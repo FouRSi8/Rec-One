@@ -1,10 +1,12 @@
 "use client";
 export const dynamic = 'force-dynamic';
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import MatrixBackground from "../components/MatrixBackground";
 
-export default function MoviePreferenceSelector() {
+// Separate component that uses useSearchParams
+function MoviePreferenceSelectorContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const year = searchParams.get("year");
@@ -109,9 +111,11 @@ export default function MoviePreferenceSelector() {
                   }}
                 >
                   <div className="w-full h-full overflow-hidden rounded-lg">
-                    <img
+                    <Image
                       src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
                       alt={movie.title}
+                      width={200}
+                      height={300}
                       className="w-full h-full object-cover"
                       onError={(e) => { e.target.src = "https://via.placeholder.com/200x300"; }}
                     />
@@ -192,5 +196,25 @@ export default function MoviePreferenceSelector() {
         }
       `}</style>
     </div>
+  );
+}
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="text-white text-xl" style={{ fontFamily: "'Courier New', monospace" }}>
+        Loading...
+      </div>
+    </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function MoviePreferenceSelector() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <MoviePreferenceSelectorContent />
+    </Suspense>
   );
 }

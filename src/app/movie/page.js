@@ -1,9 +1,12 @@
 "use client";
+export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
 
-export default function MovieRecommendation() {
+// Component that uses useSearchParams
+function MovieRecommendationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const year = searchParams.get("year");
@@ -204,9 +207,11 @@ export default function MovieRecommendation() {
           {loading && <div className="text-xl animate-pulse text-white">Scanning Matrix...</div>}
           {error && <div className="text-red-500 text-xl">{error}</div>}
           {!loading && !error && currentRecommendation && (
-            <img
+            <Image
               src={`https://image.tmdb.org/t/p/w300${currentRecommendation.poster_path}`}
               alt={currentRecommendation.title || "Movie Poster"}
+              width={300}
+              height={450}
               className="w-full max-w-xs h-auto object-contain rounded-lg shadow-md border-2 border-white hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.7)] transition-transform duration-300"
               onError={(e) => { e.target.src = "/default-poster.jpg"; e.target.alt = "Default Poster"; }}
             />
@@ -230,11 +235,11 @@ export default function MovieRecommendation() {
                 <p className="text-lg"><strong>Release Date:</strong> {currentRecommendation.release_date ? new Date(currentRecommendation.release_date).toLocaleDateString() : "N/A"}</p>
                 <p className="text-lg"><strong>Genres:</strong> {currentRecommendation.genres?.map((g) => g.name).join(", ") || "N/A"}</p>
                 <div className="text-lg">
-  <strong>TMDB Rating:</strong> {currentRecommendation.vote_average ? `${currentRecommendation.vote_average.toFixed(1)} / 10` : "N/A"}
-  {currentRecommendation.vote_count && (
-    <span className="text-sm text-gray-300 ml-2">({currentRecommendation.vote_count} votes)</span>
-  )}
-</div>
+                  <strong>TMDB Rating:</strong> {currentRecommendation.vote_average ? `${currentRecommendation.vote_average.toFixed(1)} / 10` : "N/A"}
+                  {currentRecommendation.vote_count && (
+                    <span className="text-sm text-gray-300 ml-2">({currentRecommendation.vote_count} votes)</span>
+                  )}
+                </div>
                 <p className="text-lg"><strong>Runtime:</strong> {currentRecommendation.runtime || "N/A"} minutes</p>
                 <p className="text-lg"><strong>Director:</strong> {currentRecommendation.credits?.crew?.filter(c => c.job === 'Director').map(d => d.name).join(", ") || "N/A"}</p>
                 <p className="text-lg"><strong>Writer:</strong> {currentRecommendation.credits?.crew?.filter(c => ['Writer', 'Screenplay', 'Story'].includes(c.job)).map(w => w.name).join(", ") || "N/A"}</p>
@@ -244,11 +249,9 @@ export default function MovieRecommendation() {
               <p className="text-lg"><strong>Summary:</strong> {currentRecommendation.overview?.substring(0, 200) || "No summary available."}{currentRecommendation.overview?.length > 200 ? "..." : ""}</p>
               {currentRecommendation.totalScore && currentRecommendation.totalScore > 0 && (
                 <div className="mt-2">
-                  
                   {currentRecommendation.strategyUsed && (
                     <p className="text-blue-300 text-sm">Strategy: {currentRecommendation.strategyUsed}</p>
                   )}
-                  
                 </div>
               )}
               <div className="flex gap-4 mt-4">
@@ -291,5 +294,25 @@ export default function MovieRecommendation() {
         .max-w-6xl { max-width: 96rem; }
       `}</style>
     </div>
+  );
+}
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="text-white text-xl animate-pulse" style={{ fontFamily: "'Courier New', monospace" }}>
+        Loading Matrix...
+      </div>
+    </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function MovieRecommendation() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <MovieRecommendationContent />
+    </Suspense>
   );
 }
