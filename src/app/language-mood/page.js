@@ -1,9 +1,5 @@
 "use client";
-export const metadata = {
-  title: "Rec'One - Select Movies",
-  description: "Choose 3 movies you like for personalized recommendations",
-}
-export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
