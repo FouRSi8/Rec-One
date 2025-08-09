@@ -106,7 +106,11 @@ export default function YearSelector() {
       </h1>
       <p className="text-lg mb-6 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
         Click Once to select all years ahead
+      </p>
+      <p className="text-lg mb-6 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
         Click Twice to select a specific year
+      </p>
+      <p className="text-lg mb-6 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
         Click on two years to select the interval
       </p>
       <div className="text-center z-20">
