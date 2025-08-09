@@ -1,3 +1,4 @@
+"use client";
 export const metadata = {
   title: "Rec'One - Select Movies",
   description: "Choose 3 movies you like for personalized recommendations",
