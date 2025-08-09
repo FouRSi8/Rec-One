@@ -137,7 +137,7 @@ function YearSelector() {
                     textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)'
                 },
                 className: "jsx-fc8b22897f155764" + " " + "text-6xl font-extrabold mb-8 text-white tracking-wider animate-pulse z-20",
-                children: "Take'One"
+                children: "Rec'One"
             }, void 0, false, {
                 fileName: "[project]/src/app/page.js",
                 lineNumber: 104,
