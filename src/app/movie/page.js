@@ -1,4 +1,8 @@
 "use client";
+export const metadata = {
+  title: "Rec'One - Your Recommendations",
+  description: "Movie recommendations based on your preferences",
+}
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useRef, useMemo, Suspense } from "react";
