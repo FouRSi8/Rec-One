@@ -104,19 +104,20 @@ export default function YearSelector() {
       <h1 className="text-6xl font-extrabold mb-8 text-white tracking-wider animate-pulse z-20" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)' }}>
         Rec&apos;One
       </h1>
-      <p className="text-lg mb-6 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
-        Click Once to select all years ahead
-      </p>
-      <p className="text-lg mb-6 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
-        Click Twice to select a specific year
-      </p>
-      <p className="text-lg mb-6 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
-        Click on two years to select the interval
-      </p>
+     
       <div className="text-center z-20">
         <h2 className="text-xl font-semibold text-gray-200 mb-4" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
           Choose Movie Release Years {selectedYears.length > 0 ? `(${Math.min(...selectedYears)}-${Math.max(...selectedYears)})` : ''}
         </h2>
+         <p className="text-sm mb-2 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
+        Click Once to select all years ahead
+      </p>
+      <p className="text-sm mb-2 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
+        Click Twice to select a specific year
+      </p>
+      <p className="text-sm mb-6 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
+        Click on two years to select the interval (inclusive)
+      </p>
         <div className="grid grid-cols-10 gap-2 max-w-2xl mx-auto p-4 max-h-96 overflow-y-auto scrollbar-none" role="grid" aria-label="Year selection grid">
           {years.map((year) => (
             <button
