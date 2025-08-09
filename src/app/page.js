@@ -105,7 +105,9 @@ export default function YearSelector() {
         Rec&apos;One
       </h1>
       <p className="text-lg mb-6 text-gray-300 italic z-20" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
-        Discover your perfect movie, one on track and one against.
+        Click Once to select all years ahead
+        Click Twice to select a specific year
+        Click on two years to select the interval
       </p>
       <div className="text-center z-20">
         <h2 className="text-xl font-semibold text-gray-200 mb-4" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
