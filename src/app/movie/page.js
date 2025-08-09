@@ -1,4 +1,3 @@
-"use client";
 export const metadata = {
   title: "Rec'One - Your Recommendations",
   description: "Movie recommendations based on your preferences",
