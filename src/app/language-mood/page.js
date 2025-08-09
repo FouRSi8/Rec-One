@@ -14,9 +14,13 @@ export default function MoviePreferenceSelector() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!year) {
+      router.push("/"); // Redirect to year selection if no year is provided
+      return;
+    }
     if (searchQuery) {
       setLoading(true);
-      fetch(`/api/movies?q=${encodeURIComponent(searchQuery)}`)
+      fetch(`/api/movies?q=${encodeURIComponent(searchQuery)}&year=${year}`)
         .then((response) => {
           if (!response.ok) throw new Error("Network response was not ok");
           return response.json();
@@ -32,14 +36,14 @@ export default function MoviePreferenceSelector() {
           setLoading(false);
         });
     } else {
-      setSearchResults([]); // Explicitly clear search results when searchQuery is empty
+      setSearchResults([]);
     }
-  }, [searchQuery]);
+  }, [searchQuery, year, router]);
 
   const handleMovieSelect = (movie) => {
     if (!selectedMovies.some((m) => m.id === movie.id) && selectedMovies.length < 3) {
       setSelectedMovies([...selectedMovies, movie]);
-      setSearchQuery(""); // Clear search after selection
+      setSearchQuery("");
     }
   };
 
@@ -65,7 +69,7 @@ export default function MoviePreferenceSelector() {
       <div className="absolute inset-0 backdrop-blur-md" style={{ backgroundColor: "rgba(0, 0, 0, 0.6)", zIndex: 0 }}></div>
       <MatrixBackground />
       <h1 className="text-6xl font-extrabold mb-8 text-white tracking-wider animate-pulse z-20" style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}>
-        Take&apos;One
+        Rec&apos;One
       </h1>
       <p className="text-lg mb-6 text-gray-300 italic z-20" style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)" }}>
         Select three movies you like
@@ -90,7 +94,7 @@ export default function MoviePreferenceSelector() {
             aria-label="Search for movies"
           />
           {loading && <p className="text-gray-400 mt-2" style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)" }}>Loading...</p>}
-          {searchQuery && searchResults.length > 0 && !loading && ( // Only show results if searchQuery is non-empty
+          {searchQuery && searchResults.length > 0 && !loading && (
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-2xl mx-auto max-h-96 overflow-y-auto scrollbar-none">
               {searchResults.map((movie) => (
                 <div
@@ -109,7 +113,7 @@ export default function MoviePreferenceSelector() {
                       src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
                       alt={movie.title}
                       className="w-full h-full object-cover"
-                      onError={(e) => { e.target.src = "https://via.placeholder.com/200x300"; }} // Fallback image
+                      onError={(e) => { e.target.src = "https://via.placeholder.com/200x300"; }}
                     />
                   </div>
                   <div
@@ -156,7 +160,7 @@ export default function MoviePreferenceSelector() {
         <button
           onClick={handleNext}
           disabled={selectedMovies.length !== 3 || !year}
-          className="mt-6 px-6 py-2 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-500 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-6 px-6 py-2 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-600 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ fontFamily: "'Courier New', monospace", textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)" }}
           aria-label="Proceed to movie recommendation"
         >
@@ -181,10 +185,10 @@ export default function MoviePreferenceSelector() {
           animation: fadeIn 0.3s ease-out forwards;
         }
         .scrollbar-none {
-          scrollbar-width: none; /* Firefox */
+          scrollbar-width: none;
         }
         .scrollbar-none::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Edge */
+          display: none;
         }
       `}</style>
     </div>

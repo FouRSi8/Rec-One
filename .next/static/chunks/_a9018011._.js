@@ -19,46 +19,43 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 function MovieRecommendation() {
-    var _recommendation_genres, _recommendation_credits_crew, _recommendation_credits, _recommendation_credits_crew1, _recommendation_credits1, _recommendation_production_companies, _recommendation_credits_crew2, _recommendation_credits2, _recommendation_overview, _recommendation_overview1;
+    var _currentRecommendation_genres, _currentRecommendation_credits_crew, _currentRecommendation_credits, _currentRecommendation_credits_crew1, _currentRecommendation_credits1, _currentRecommendation_production_companies, _currentRecommendation_credits_crew2, _currentRecommendation_credits2, _currentRecommendation_overview, _currentRecommendation_overview1;
     _s();
     const searchParams = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSearchParams"])();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
     const year = searchParams.get("year");
-    // Memoize movieIds to prevent unnecessary re-renders
     const movieIds = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
         "MovieRecommendation.useMemo[movieIds]": ()=>{
             var _searchParams_get;
-            const ids = (_searchParams_get = searchParams.get("movieIds")) === null || _searchParams_get === void 0 ? void 0 : _searchParams_get.split(",");
-            return (ids === null || ids === void 0 ? void 0 : ids.filter({
-                "MovieRecommendation.useMemo[movieIds]": (id)=>id.trim()
-            }["MovieRecommendation.useMemo[movieIds]"])) || null;
+            const ids = ((_searchParams_get = searchParams.get("movieIds")) === null || _searchParams_get === void 0 ? void 0 : _searchParams_get.split(",").filter({
+                "MovieRecommendation.useMemo[movieIds]": (id)=>id === null || id === void 0 ? void 0 : id.trim()
+            }["MovieRecommendation.useMemo[movieIds]"])) || [];
+            return ids.length === 3 ? ids : null;
         }
     }["MovieRecommendation.useMemo[movieIds]"], [
         searchParams
     ]);
-    const [recommendation, setRecommendation] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [recommendations, setRecommendations] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [currentIndex, setCurrentIndex] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(0);
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const abortControllerRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const canvasRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "MovieRecommendation.useEffect": ()=>{
-            // Clear previous request
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
             }
-            // Validate movieIds
-            if (!movieIds || movieIds.length !== 3) {
-                setError("Please select exactly 3 movies.");
+            if (!movieIds || !year || !year.includes("-")) {
+                setError("Please select exactly 3 movies and a valid year range (e.g., 2010-2020).");
                 setLoading(false);
-                setRecommendation(null);
+                setRecommendations([]);
                 return;
             }
-            // Start fetching
             setLoading(true);
             setError(null);
-            setRecommendation(null);
-            // Create new AbortController for this request
+            setRecommendations([]);
+            setCurrentIndex(0);
             abortControllerRef.current = new AbortController();
             const signal = abortControllerRef.current.signal;
             const timeoutId = setTimeout({
@@ -72,8 +69,14 @@ function MovieRecommendation() {
                     }
                 }
             }["MovieRecommendation.useEffect.timeoutId"], 20000);
-            const movieIdsString = movieIds.join(",");
-            fetch("/api/recommendations?movieIds=".concat(movieIdsString, "&year=").concat(year || ""), {
+            const [minYear, maxYear] = year.split("-").map(Number);
+            if (isNaN(minYear) || isNaN(maxYear) || minYear > maxYear) {
+                setError("Invalid year range format. Use minYear-maxYear (e.g., 2010-2020).");
+                setLoading(false);
+                clearTimeout(timeoutId);
+                return;
+            }
+            fetch("/api/recommendations?movieIds=".concat(movieIds.join(","), "&year=").concat(year), {
                 signal
             }).then({
                 "MovieRecommendation.useEffect": (response)=>{
@@ -83,26 +86,53 @@ function MovieRecommendation() {
                 }
             }["MovieRecommendation.useEffect"]).then({
                 "MovieRecommendation.useEffect": (data)=>{
-                    var _data_recommendedMovie_id, _data_recommendedMovie;
                     if (signal.aborted || !data) return;
                     clearTimeout(timeoutId);
-                    if (data.error) throw new Error(data.error);
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    const recs = data.allRecommendations || [];
+                    console.log("Received recommendations:", recs);
                     const inputMovieIds = movieIds.map({
                         "MovieRecommendation.useEffect.inputMovieIds": (id)=>id.toString()
                     }["MovieRecommendation.useEffect.inputMovieIds"]);
-                    const recommendedId = (_data_recommendedMovie = data.recommendedMovie) === null || _data_recommendedMovie === void 0 ? void 0 : (_data_recommendedMovie_id = _data_recommendedMovie.id) === null || _data_recommendedMovie_id === void 0 ? void 0 : _data_recommendedMovie_id.toString();
-                    if (data.recommendedMovie && !inputMovieIds.includes(recommendedId)) {
-                        setRecommendation(data.recommendedMovie);
+                    const filteredRecommendations = recs.filter({
+                        "MovieRecommendation.useEffect.filteredRecommendations": (rec)=>{
+                            var _rec_id;
+                            if (!(rec === null || rec === void 0 ? void 0 : rec.release_date)) {
+                                console.warn("Recommendation ".concat(rec === null || rec === void 0 ? void 0 : rec.title, " missing release_date, skipping"));
+                                return false;
+                            }
+                            const releaseYear = new Date(rec.release_date).getFullYear();
+                            const isInRange = releaseYear >= minYear && releaseYear <= maxYear;
+                            const isNotInput = !inputMovieIds.includes((_rec_id = rec.id) === null || _rec_id === void 0 ? void 0 : _rec_id.toString());
+                            if (!isInRange) console.warn("Recommendation ".concat(rec.title, " (").concat(releaseYear, ") outside ").concat(minYear, "-").concat(maxYear));
+                            if (!isNotInput) console.warn("Recommendation ".concat(rec.title, " matches input ID ").concat(rec.id));
+                            return isInRange && isNotInput;
+                        }
+                    }["MovieRecommendation.useEffect.filteredRecommendations"]).map({
+                        "MovieRecommendation.useEffect.filteredRecommendations": (rec)=>({
+                                ...rec,
+                                genres: rec.genres || [],
+                                credits: rec.credits || {
+                                    crew: []
+                                },
+                                overview: rec.overview || "No summary available",
+                                poster_path: rec.poster_path || "/default-poster.jpg"
+                            })
+                    }["MovieRecommendation.useEffect.filteredRecommendations"]);
+                    if (filteredRecommendations.length > 0) {
+                        setRecommendations(filteredRecommendations);
                         setError(null);
                     } else {
-                        throw new Error("Recommendation matches an input movie or no valid result");
+                        throw new Error("No valid recommendations found for the selected year range.");
                     }
                 }
             }["MovieRecommendation.useEffect"]).catch({
                 "MovieRecommendation.useEffect": (fetchError)=>{
                     if (signal.aborted) return;
                     clearTimeout(timeoutId);
-                    setError(fetchError.message || "Failed to fetch recommendation");
+                    setError(fetchError.message || "Failed to fetch recommendations");
                     console.error("Fetch Error:", fetchError);
                 }
             }["MovieRecommendation.useEffect"]).finally({
@@ -113,7 +143,6 @@ function MovieRecommendation() {
                     clearTimeout(timeoutId);
                 }
             }["MovieRecommendation.useEffect"]);
-            // Cleanup function
             return ({
                 "MovieRecommendation.useEffect": ()=>{
                     clearTimeout(timeoutId);
@@ -126,14 +155,19 @@ function MovieRecommendation() {
     }["MovieRecommendation.useEffect"], [
         movieIds,
         year
-    ]); // Only depend on movieIds and year
-    // Matrix falling code effect
+    ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "MovieRecommendation.useEffect": ()=>{
             const canvas = canvasRef.current;
-            if (!canvas) return;
+            if (!canvas) {
+                console.warn("Canvas element not found");
+                return;
+            }
             const ctx = canvas.getContext("2d");
-            if (!ctx) return;
+            if (!ctx) {
+                console.error("2D context not supported");
+                return;
+            }
             const resizeCanvas = {
                 "MovieRecommendation.useEffect.resizeCanvas": ()=>{
                     canvas.height = window.innerHeight;
@@ -141,6 +175,7 @@ function MovieRecommendation() {
                 }
             }["MovieRecommendation.useEffect.resizeCanvas"];
             resizeCanvas();
+            window.addEventListener("resize", resizeCanvas);
             const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             const fontSize = 14;
             const columns = canvas.width / fontSize;
@@ -162,7 +197,6 @@ function MovieRecommendation() {
                 }
             }["MovieRecommendation.useEffect.draw"];
             const interval = setInterval(draw, 33);
-            window.addEventListener("resize", resizeCanvas);
             return ({
                 "MovieRecommendation.useEffect": ()=>{
                     clearInterval(interval);
@@ -171,6 +205,14 @@ function MovieRecommendation() {
             })["MovieRecommendation.useEffect"];
         }
     }["MovieRecommendation.useEffect"], []);
+    const handleNextRecommendation = ()=>{
+        if (currentIndex < recommendations.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+        } else {
+            console.log("Reached the last recommendation");
+        }
+    };
+    const currentRecommendation = recommendations[currentIndex];
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         style: {
             backgroundImage: "url('/matrix.jpg')",
@@ -186,7 +228,7 @@ function MovieRecommendation() {
                 className: "jsx-e32b42317d0a4ae0" + " " + "absolute inset-0 backdrop-blur-md"
             }, void 0, false, {
                 fileName: "[project]/src/app/movie/page.js",
-                lineNumber: 159,
+                lineNumber: 194,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("canvas", {
@@ -194,7 +236,7 @@ function MovieRecommendation() {
                 className: "jsx-e32b42317d0a4ae0" + " " + "absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none z-10"
             }, void 0, false, {
                 fileName: "[project]/src/app/movie/page.js",
-                lineNumber: 160,
+                lineNumber: 195,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
@@ -205,7 +247,7 @@ function MovieRecommendation() {
                 children: "Take'One"
             }, void 0, false, {
                 fileName: "[project]/src/app/movie/page.js",
-                lineNumber: 161,
+                lineNumber: 196,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -216,7 +258,7 @@ function MovieRecommendation() {
                 children: "Discover your perfect movie match"
             }, void 0, false, {
                 fileName: "[project]/src/app/movie/page.js",
-                lineNumber: 164,
+                lineNumber: 199,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -230,7 +272,7 @@ function MovieRecommendation() {
                                 children: "Scanning Matrix..."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 169,
+                                lineNumber: 204,
                                 columnNumber: 23
                             }, this),
                             error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -238,33 +280,34 @@ function MovieRecommendation() {
                                 children: error
                             }, void 0, false, {
                                 fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 170,
+                                lineNumber: 205,
                                 columnNumber: 21
                             }, this),
-                            !loading && !error && recommendation && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
-                                src: "https://image.tmdb.org/t/p/w300".concat(recommendation.poster_path),
-                                alt: recommendation.title,
+                            !loading && !error && currentRecommendation && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                src: "https://image.tmdb.org/t/p/w300".concat(currentRecommendation.poster_path),
+                                alt: currentRecommendation.title || "Movie Poster",
                                 onError: (e)=>{
-                                    e.target.src = "https://via.placeholder.com/300x450";
+                                    e.target.src = "/default-poster.jpg";
+                                    e.target.alt = "Default Poster";
                                 },
                                 className: "jsx-e32b42317d0a4ae0" + " " + "w-full max-w-xs h-auto object-contain rounded-lg shadow-md border-2 border-white hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.7)] transition-transform duration-300"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 172,
+                                lineNumber: 207,
                                 columnNumber: 13
                             }, this),
-                            !loading && !error && !recommendation && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            !loading && !error && !currentRecommendation && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "jsx-e32b42317d0a4ae0" + " " + "text-xl text-white",
                                 children: "No match found..."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 180,
+                                lineNumber: 215,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/movie/page.js",
-                        lineNumber: 168,
+                        lineNumber: 203,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -276,12 +319,12 @@ function MovieRecommendation() {
                                 },
                                 className: "jsx-e32b42317d0a4ae0" + " " + "text-2xl font-semibold mb-4 text-white",
                                 children: [
-                                    "Selected Year: ",
+                                    "Selected Year Range: ",
                                     year || "Not set"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 184,
+                                lineNumber: 219,
                                 columnNumber: 11
                             }, this),
                             loading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -289,7 +332,7 @@ function MovieRecommendation() {
                                 children: "Analyzing data streams..."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 187,
+                                lineNumber: 222,
                                 columnNumber: 23
                             }, this),
                             error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -297,10 +340,10 @@ function MovieRecommendation() {
                                 children: error
                             }, void 0, false, {
                                 fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 188,
+                                lineNumber: 223,
                                 columnNumber: 21
                             }, this),
-                            !loading && !error && recommendation && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            !loading && !error && currentRecommendation && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "jsx-e32b42317d0a4ae0" + " " + "space-y-3",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -310,11 +353,11 @@ function MovieRecommendation() {
                                         className: "jsx-e32b42317d0a4ae0" + " " + "text-3xl font-bold mb-2 text-white",
                                         children: [
                                             "Recommended: ",
-                                            recommendation.title
+                                            currentRecommendation.title || "Untitled"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/movie/page.js",
-                                        lineNumber: 191,
+                                        lineNumber: 226,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -328,15 +371,15 @@ function MovieRecommendation() {
                                                         children: "Release Date:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/movie/page.js",
-                                                        lineNumber: 195,
+                                                        lineNumber: 230,
                                                         columnNumber: 40
                                                     }, this),
                                                     " ",
-                                                    new Date(recommendation.release_date).toLocaleDateString()
+                                                    currentRecommendation.release_date ? new Date(currentRecommendation.release_date).toLocaleDateString() : "N/A"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 195,
+                                                lineNumber: 230,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -347,35 +390,46 @@ function MovieRecommendation() {
                                                         children: "Genres:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/movie/page.js",
-                                                        lineNumber: 196,
+                                                        lineNumber: 231,
                                                         columnNumber: 40
                                                     }, this),
                                                     " ",
-                                                    ((_recommendation_genres = recommendation.genres) === null || _recommendation_genres === void 0 ? void 0 : _recommendation_genres.map((g)=>g.name).join(", ")) || "N/A"
+                                                    ((_currentRecommendation_genres = currentRecommendation.genres) === null || _currentRecommendation_genres === void 0 ? void 0 : _currentRecommendation_genres.map((g)=>g.name).join(", ")) || "N/A"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 196,
+                                                lineNumber: 231,
                                                 columnNumber: 17
                                             }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "jsx-e32b42317d0a4ae0" + " " + "text-lg",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
                                                         className: "jsx-e32b42317d0a4ae0",
-                                                        children: "Rating:"
+                                                        children: "TMDB Rating:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/movie/page.js",
-                                                        lineNumber: 197,
-                                                        columnNumber: 40
+                                                        lineNumber: 233,
+                                                        columnNumber: 3
                                                     }, this),
                                                     " ",
-                                                    recommendation.vote_average || "N/A",
-                                                    " / 10"
+                                                    currentRecommendation.vote_average ? "".concat(currentRecommendation.vote_average.toFixed(1), " / 10") : "N/A",
+                                                    currentRecommendation.vote_count && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "jsx-e32b42317d0a4ae0" + " " + "text-sm text-gray-300 ml-2",
+                                                        children: [
+                                                            "(",
+                                                            currentRecommendation.vote_count,
+                                                            " votes)"
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/app/movie/page.js",
+                                                        lineNumber: 235,
+                                                        columnNumber: 5
+                                                    }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 197,
+                                                lineNumber: 232,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -386,16 +440,16 @@ function MovieRecommendation() {
                                                         children: "Runtime:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/movie/page.js",
-                                                        lineNumber: 198,
+                                                        lineNumber: 238,
                                                         columnNumber: 40
                                                     }, this),
                                                     " ",
-                                                    recommendation.runtime || "N/A",
+                                                    currentRecommendation.runtime || "N/A",
                                                     " minutes"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 198,
+                                                lineNumber: 238,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -406,15 +460,15 @@ function MovieRecommendation() {
                                                         children: "Director:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/movie/page.js",
-                                                        lineNumber: 199,
+                                                        lineNumber: 239,
                                                         columnNumber: 40
                                                     }, this),
                                                     " ",
-                                                    ((_recommendation_credits = recommendation.credits) === null || _recommendation_credits === void 0 ? void 0 : (_recommendation_credits_crew = _recommendation_credits.crew) === null || _recommendation_credits_crew === void 0 ? void 0 : _recommendation_credits_crew.filter((c)=>c.job === 'Director').map((d)=>d.name).join(", ")) || "N/A"
+                                                    ((_currentRecommendation_credits = currentRecommendation.credits) === null || _currentRecommendation_credits === void 0 ? void 0 : (_currentRecommendation_credits_crew = _currentRecommendation_credits.crew) === null || _currentRecommendation_credits_crew === void 0 ? void 0 : _currentRecommendation_credits_crew.filter((c)=>c.job === 'Director').map((d)=>d.name).join(", ")) || "N/A"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 199,
+                                                lineNumber: 239,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -425,11 +479,11 @@ function MovieRecommendation() {
                                                         children: "Writer:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/movie/page.js",
-                                                        lineNumber: 200,
+                                                        lineNumber: 240,
                                                         columnNumber: 40
                                                     }, this),
                                                     " ",
-                                                    ((_recommendation_credits1 = recommendation.credits) === null || _recommendation_credits1 === void 0 ? void 0 : (_recommendation_credits_crew1 = _recommendation_credits1.crew) === null || _recommendation_credits_crew1 === void 0 ? void 0 : _recommendation_credits_crew1.filter((c)=>[
+                                                    ((_currentRecommendation_credits1 = currentRecommendation.credits) === null || _currentRecommendation_credits1 === void 0 ? void 0 : (_currentRecommendation_credits_crew1 = _currentRecommendation_credits1.crew) === null || _currentRecommendation_credits_crew1 === void 0 ? void 0 : _currentRecommendation_credits_crew1.filter((c)=>[
                                                             'Writer',
                                                             'Screenplay',
                                                             'Story'
@@ -437,7 +491,7 @@ function MovieRecommendation() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 200,
+                                                lineNumber: 240,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -448,15 +502,15 @@ function MovieRecommendation() {
                                                         children: "Production:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/movie/page.js",
-                                                        lineNumber: 201,
+                                                        lineNumber: 241,
                                                         columnNumber: 40
                                                     }, this),
                                                     " ",
-                                                    ((_recommendation_production_companies = recommendation.production_companies) === null || _recommendation_production_companies === void 0 ? void 0 : _recommendation_production_companies.map((c)=>c.name).join(", ")) || "N/A"
+                                                    ((_currentRecommendation_production_companies = currentRecommendation.production_companies) === null || _currentRecommendation_production_companies === void 0 ? void 0 : _currentRecommendation_production_companies.map((c)=>c.name).join(", ")) || "N/A"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 201,
+                                                lineNumber: 241,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -467,24 +521,24 @@ function MovieRecommendation() {
                                                         children: "Music:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/movie/page.js",
-                                                        lineNumber: 202,
+                                                        lineNumber: 242,
                                                         columnNumber: 40
                                                     }, this),
                                                     " ",
-                                                    ((_recommendation_credits2 = recommendation.credits) === null || _recommendation_credits2 === void 0 ? void 0 : (_recommendation_credits_crew2 = _recommendation_credits2.crew) === null || _recommendation_credits_crew2 === void 0 ? void 0 : _recommendation_credits_crew2.filter((c)=>[
+                                                    ((_currentRecommendation_credits2 = currentRecommendation.credits) === null || _currentRecommendation_credits2 === void 0 ? void 0 : (_currentRecommendation_credits_crew2 = _currentRecommendation_credits2.crew) === null || _currentRecommendation_credits_crew2 === void 0 ? void 0 : _currentRecommendation_credits_crew2.filter((c)=>[
                                                             'Original Music Composer',
                                                             'Music'
                                                         ].includes(c.job)).map((m)=>m.name).join(", ")) || "N/A"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 202,
+                                                lineNumber: 242,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/movie/page.js",
-                                        lineNumber: 194,
+                                        lineNumber: 229,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -495,105 +549,96 @@ function MovieRecommendation() {
                                                 children: "Summary:"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 204,
+                                                lineNumber: 244,
                                                 columnNumber: 38
                                             }, this),
                                             " ",
-                                            ((_recommendation_overview = recommendation.overview) === null || _recommendation_overview === void 0 ? void 0 : _recommendation_overview.substring(0, 200)) || "No summary available.",
-                                            ((_recommendation_overview1 = recommendation.overview) === null || _recommendation_overview1 === void 0 ? void 0 : _recommendation_overview1.length) > 200 ? "..." : ""
+                                            ((_currentRecommendation_overview = currentRecommendation.overview) === null || _currentRecommendation_overview === void 0 ? void 0 : _currentRecommendation_overview.substring(0, 200)) || "No summary available.",
+                                            ((_currentRecommendation_overview1 = currentRecommendation.overview) === null || _currentRecommendation_overview1 === void 0 ? void 0 : _currentRecommendation_overview1.length) > 200 ? "..." : ""
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/movie/page.js",
-                                        lineNumber: 204,
+                                        lineNumber: 244,
                                         columnNumber: 15
                                     }, this),
-                                    recommendation.totalScore && recommendation.totalScore > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    currentRecommendation.totalScore && currentRecommendation.totalScore > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "jsx-e32b42317d0a4ae0" + " " + "mt-2",
+                                        children: currentRecommendation.strategyUsed && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "jsx-e32b42317d0a4ae0" + " " + "text-blue-300 text-sm",
+                                            children: [
+                                                "Strategy: ",
+                                                currentRecommendation.strategyUsed
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/app/movie/page.js",
+                                            lineNumber: 249,
+                                            columnNumber: 21
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/movie/page.js",
+                                        lineNumber: 246,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "jsx-e32b42317d0a4ae0" + " " + "flex gap-4 mt-4",
                                         children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "jsx-e32b42317d0a4ae0" + " " + "text-green-400 text-lg",
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
-                                                        className: "jsx-e32b42317d0a4ae0",
-                                                        children: "Score:"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/app/movie/page.js",
-                                                        lineNumber: 207,
-                                                        columnNumber: 57
-                                                    }, this),
-                                                    " ",
-                                                    Math.round(recommendation.totalScore)
-                                                ]
-                                            }, void 0, true, {
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                onClick: handleNextRecommendation,
+                                                disabled: currentIndex >= recommendations.length - 1,
+                                                style: {
+                                                    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
+                                                },
+                                                "aria-label": "View next recommendation",
+                                                className: "jsx-e32b42317d0a4ae0" + " " + "px-4 py-2 bg-green-500 text-black font-semibold rounded-md hover:bg-green-600 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed",
+                                                children: "Next"
+                                            }, void 0, false, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 207,
-                                                columnNumber: 19
+                                                lineNumber: 255,
+                                                columnNumber: 17
                                             }, this),
-                                            recommendation.strategyUsed && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "jsx-e32b42317d0a4ae0" + " " + "text-blue-300 text-sm",
-                                                children: [
-                                                    "Strategy: ",
-                                                    recommendation.strategyUsed
-                                                ]
-                                            }, void 0, true, {
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                onClick: ()=>router.push("/"),
+                                                style: {
+                                                    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
+                                                },
+                                                "aria-label": "Back to movie selection",
+                                                className: "jsx-e32b42317d0a4ae0" + " " + "px-4 py-2 bg-green-500 text-black font-semibold rounded-md hover:bg-green-600 transition duration-300 transform hover:scale-105",
+                                                children: "Back to Matrix"
+                                            }, void 0, false, {
                                                 fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 209,
-                                                columnNumber: 21
-                                            }, this),
-                                            recommendation.redditSentimentScore && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                className: "jsx-e32b42317d0a4ae0" + " " + "text-purple-300 text-sm",
-                                                children: [
-                                                    "Sentiment: ",
-                                                    recommendation.redditSentimentScore.toFixed(2)
-                                                ]
-                                            }, void 0, true, {
-                                                fileName: "[project]/src/app/movie/page.js",
-                                                lineNumber: 212,
-                                                columnNumber: 21
+                                                lineNumber: 264,
+                                                columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/movie/page.js",
-                                        lineNumber: 206,
-                                        columnNumber: 17
+                                        lineNumber: 254,
+                                        columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 190,
+                                lineNumber: 225,
                                 columnNumber: 13
                             }, this),
-                            !loading && !error && !recommendation && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            !loading && !error && !currentRecommendation && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 className: "jsx-e32b42317d0a4ae0" + " " + "text-lg text-white",
                                 children: "No recommendation available..."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 219,
+                                lineNumber: 276,
                                 columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                onClick: ()=>router.push("/"),
-                                style: {
-                                    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
-                                },
-                                "aria-label": "Back to movie selection",
-                                className: "jsx-e32b42317d0a4ae0" + " " + "mt-6 px-4 py-2 bg-green-500 text-black font-semibold rounded-md hover:bg-green-600 transition duration-300",
-                                children: "Back to Matrix"
-                            }, void 0, false, {
-                                fileName: "[project]/src/app/movie/page.js",
-                                lineNumber: 221,
-                                columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/movie/page.js",
-                        lineNumber: 183,
+                        lineNumber: 218,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/movie/page.js",
-                lineNumber: 167,
+                lineNumber: 202,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -604,7 +649,7 @@ function MovieRecommendation() {
                 children: "Powered by TMDB"
             }, void 0, false, {
                 fileName: "[project]/src/app/movie/page.js",
-                lineNumber: 231,
+                lineNumber: 280,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$styled$2d$jsx$2f$style$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -614,11 +659,11 @@ function MovieRecommendation() {
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/movie/page.js",
-        lineNumber: 152,
+        lineNumber: 187,
         columnNumber: 5
     }, this);
 }
-_s(MovieRecommendation, "XCwL6sLFVuy0/i04pgqr7zosufM=", false, function() {
+_s(MovieRecommendation, "HSdAvTpp+ChB1tq5YnRvcw2zlKg=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSearchParams"],
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]

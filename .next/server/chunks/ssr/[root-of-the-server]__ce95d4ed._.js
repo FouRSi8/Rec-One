@@ -116,9 +116,13 @@ function MoviePreferenceSelector() {
     const [searchResults, setSearchResults] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (!year) {
+            router.push("/"); // Redirect to year selection if no year is provided
+            return;
+        }
         if (searchQuery) {
             setLoading(true);
-            fetch(`/api/movies?q=${encodeURIComponent(searchQuery)}`).then((response)=>{
+            fetch(`/api/movies?q=${encodeURIComponent(searchQuery)}&year=${year}`).then((response)=>{
                 if (!response.ok) throw new Error("Network response was not ok");
                 return response.json();
             }).then((data)=>{
@@ -130,10 +134,12 @@ function MoviePreferenceSelector() {
                 setLoading(false);
             });
         } else {
-            setSearchResults([]); // Explicitly clear search results when searchQuery is empty
+            setSearchResults([]);
         }
     }, [
-        searchQuery
+        searchQuery,
+        year,
+        router
     ]);
     const handleMovieSelect = (movie)=>{
         if (!selectedMovies.some((m)=>m.id === movie.id) && selectedMovies.length < 3) {
@@ -141,7 +147,7 @@ function MoviePreferenceSelector() {
                 ...selectedMovies,
                 movie
             ]);
-            setSearchQuery(""); // Clear search after selection
+            setSearchQuery("");
         }
     };
     const handleRemoveMovie = (movieId)=>{
@@ -158,75 +164,75 @@ function MoviePreferenceSelector() {
             fontFamily: "'Courier New', monospace",
             backgroundImage: "url('/matrix.jpg')"
         },
-        className: "jsx-c7a89359c4291cf8" + " " + "min-h-screen flex flex-col items-center justify-center bg-cover bg-center relative",
+        className: "jsx-cb4c8906e2eb1b52" + " " + "min-h-screen flex flex-col items-center justify-center bg-cover bg-center relative",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 style: {
                     backgroundColor: "rgba(0, 0, 0, 0.6)",
                     zIndex: 0
                 },
-                className: "jsx-c7a89359c4291cf8" + " " + "absolute inset-0 backdrop-blur-md"
+                className: "jsx-cb4c8906e2eb1b52" + " " + "absolute inset-0 backdrop-blur-md"
             }, void 0, false, {
                 fileName: "[project]/src/app/language-mood/page.js",
-                lineNumber: 65,
+                lineNumber: 69,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$components$2f$MatrixBackground$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/src/app/language-mood/page.js",
-                lineNumber: 66,
+                lineNumber: 70,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
                 style: {
                     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)"
                 },
-                className: "jsx-c7a89359c4291cf8" + " " + "text-6xl font-extrabold mb-8 text-white tracking-wider animate-pulse z-20",
+                className: "jsx-cb4c8906e2eb1b52" + " " + "text-6xl font-extrabold mb-8 text-white tracking-wider animate-pulse z-20",
                 children: "Take'One"
             }, void 0, false, {
                 fileName: "[project]/src/app/language-mood/page.js",
-                lineNumber: 67,
+                lineNumber: 71,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                 style: {
                     textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
                 },
-                className: "jsx-c7a89359c4291cf8" + " " + "text-lg mb-6 text-gray-300 italic z-20",
+                className: "jsx-cb4c8906e2eb1b52" + " " + "text-lg mb-6 text-gray-300 italic z-20",
                 children: "Select three movies you like"
             }, void 0, false, {
                 fileName: "[project]/src/app/language-mood/page.js",
-                lineNumber: 70,
+                lineNumber: 74,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-c7a89359c4291cf8" + " " + "text-center z-20",
+                className: "jsx-cb4c8906e2eb1b52" + " " + "text-center z-20",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
                         style: {
                             textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
                         },
-                        className: "jsx-c7a89359c4291cf8" + " " + "text-xl font-semibold text-gray-200 mb-4",
+                        className: "jsx-cb4c8906e2eb1b52" + " " + "text-xl font-semibold text-gray-200 mb-4",
                         children: [
                             "Selected Year: ",
                             year || "Not set"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/language-mood/page.js",
-                        lineNumber: 74,
+                        lineNumber: 78,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "jsx-c7a89359c4291cf8" + " " + "mb-6",
+                        className: "jsx-cb4c8906e2eb1b52" + " " + "mb-6",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                                 style: {
                                     textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
                                 },
-                                className: "jsx-c7a89359c4291cf8" + " " + "text-lg font-semibold text-gray-200 mb-2",
+                                className: "jsx-cb4c8906e2eb1b52" + " " + "text-lg font-semibold text-gray-200 mb-2",
                                 children: "Search and Select 3 Movies"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/language-mood/page.js",
-                                lineNumber: 80,
+                                lineNumber: 84,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -239,25 +245,25 @@ function MoviePreferenceSelector() {
                                     textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
                                 },
                                 "aria-label": "Search for movies",
-                                className: "jsx-c7a89359c4291cf8" + " " + "p-2 rounded-lg bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 w-full max-w-xs"
+                                className: "jsx-cb4c8906e2eb1b52" + " " + "p-2 rounded-lg bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 w-full max-w-xs"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/language-mood/page.js",
-                                lineNumber: 83,
+                                lineNumber: 87,
                                 columnNumber: 11
                             }, this),
                             loading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 style: {
                                     textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
                                 },
-                                className: "jsx-c7a89359c4291cf8" + " " + "text-gray-400 mt-2",
+                                className: "jsx-cb4c8906e2eb1b52" + " " + "text-gray-400 mt-2",
                                 children: "Loading..."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/language-mood/page.js",
-                                lineNumber: 92,
+                                lineNumber: 96,
                                 columnNumber: 23
                             }, this),
                             searchQuery && searchResults.length > 0 && !loading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "jsx-c7a89359c4291cf8" + " " + "mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-2xl mx-auto max-h-96 overflow-y-auto scrollbar-none",
+                                className: "jsx-cb4c8906e2eb1b52" + " " + "mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-2xl mx-auto max-h-96 overflow-y-auto scrollbar-none",
                                 children: searchResults.map((movie)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         onClick: ()=>handleMovieSelect(movie),
                                         style: {
@@ -266,25 +272,25 @@ function MoviePreferenceSelector() {
                                             width: "200px",
                                             height: "300px"
                                         },
-                                        className: "jsx-c7a89359c4291cf8" + " " + "fade-in bg-gray-700 rounded-lg cursor-pointer transition-all duration-300 hover:border-2 hover:border-green-500 hover:p-1 shadow-md hover:shadow-lg relative",
+                                        className: "jsx-cb4c8906e2eb1b52" + " " + "fade-in bg-gray-700 rounded-lg cursor-pointer transition-all duration-300 hover:border-2 hover:border-green-500 hover:p-1 shadow-md hover:shadow-lg relative",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "jsx-c7a89359c4291cf8" + " " + "w-full h-full overflow-hidden rounded-lg",
+                                                className: "jsx-cb4c8906e2eb1b52" + " " + "w-full h-full overflow-hidden rounded-lg",
                                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
                                                     src: `https://image.tmdb.org/t/p/w200${movie.poster_path}`,
                                                     alt: movie.title,
                                                     onError: (e)=>{
                                                         e.target.src = "https://via.placeholder.com/200x300";
                                                     },
-                                                    className: "jsx-c7a89359c4291cf8" + " " + "w-full h-full object-cover"
+                                                    className: "jsx-cb4c8906e2eb1b52" + " " + "w-full h-full object-cover"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/language-mood/page.js",
-                                                    lineNumber: 108,
+                                                    lineNumber: 112,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/language-mood/page.js",
-                                                lineNumber: 107,
+                                                lineNumber: 111,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -292,10 +298,10 @@ function MoviePreferenceSelector() {
                                                     fontFamily: "'Courier New', monospace",
                                                     textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)"
                                                 },
-                                                className: "jsx-c7a89359c4291cf8" + " " + "absolute bottom-0 left-0 w-full bg-black bg-opacity-70 text-white text-center p-2 rounded-b-lg",
+                                                className: "jsx-cb4c8906e2eb1b52" + " " + "absolute bottom-0 left-0 w-full bg-black bg-opacity-70 text-white text-center p-2 rounded-b-lg",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "jsx-c7a89359c4291cf8" + " " + "font-semibold truncate",
+                                                        className: "jsx-cb4c8906e2eb1b52" + " " + "font-semibold truncate",
                                                         children: [
                                                             movie.title,
                                                             " (",
@@ -304,11 +310,11 @@ function MoviePreferenceSelector() {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/language-mood/page.js",
-                                                        lineNumber: 122,
+                                                        lineNumber: 126,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "jsx-c7a89359c4291cf8" + " " + "text-xs",
+                                                        className: "jsx-cb4c8906e2eb1b52" + " " + "text-xs",
                                                         children: [
                                                             "Click to select (",
                                                             selectedMovies.length + 1,
@@ -316,40 +322,40 @@ function MoviePreferenceSelector() {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/language-mood/page.js",
-                                                        lineNumber: 123,
+                                                        lineNumber: 127,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/language-mood/page.js",
-                                                lineNumber: 115,
+                                                lineNumber: 119,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, movie.id, true, {
                                         fileName: "[project]/src/app/language-mood/page.js",
-                                        lineNumber: 96,
+                                        lineNumber: 100,
                                         columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/language-mood/page.js",
-                                lineNumber: 94,
+                                lineNumber: 98,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/language-mood/page.js",
-                        lineNumber: 79,
+                        lineNumber: 83,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "jsx-c7a89359c4291cf8" + " " + "mb-6",
+                        className: "jsx-cb4c8906e2eb1b52" + " " + "mb-6",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                                 style: {
                                     textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
                                 },
-                                className: "jsx-c7a89359c4291cf8" + " " + "text-lg font-semibold text-gray-200 mb-2",
+                                className: "jsx-cb4c8906e2eb1b52" + " " + "text-lg font-semibold text-gray-200 mb-2",
                                 children: [
                                     "Selected Movies (",
                                     selectedMovies.length,
@@ -357,20 +363,20 @@ function MoviePreferenceSelector() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/language-mood/page.js",
-                                lineNumber: 133,
+                                lineNumber: 137,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "jsx-c7a89359c4291cf8" + " " + "grid grid-cols-1 gap-2 max-w-md mx-auto",
+                                className: "jsx-cb4c8906e2eb1b52" + " " + "grid grid-cols-1 gap-2 max-w-md mx-auto",
                                 children: selectedMovies.map((movie)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         style: {
                                             fontFamily: "'Courier New', monospace",
                                             textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
                                         },
-                                        className: "jsx-c7a89359c4291cf8" + " " + "p-2 bg-gray-700 rounded-lg flex justify-between items-center",
+                                        className: "jsx-cb4c8906e2eb1b52" + " " + "p-2 bg-gray-700 rounded-lg flex justify-between items-center",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                className: "jsx-c7a89359c4291cf8",
+                                                className: "jsx-cb4c8906e2eb1b52",
                                                 children: [
                                                     movie.title,
                                                     " (",
@@ -379,7 +385,7 @@ function MoviePreferenceSelector() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/language-mood/page.js",
-                                                lineNumber: 143,
+                                                lineNumber: 147,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -387,28 +393,28 @@ function MoviePreferenceSelector() {
                                                 style: {
                                                     fontFamily: "'Courier New', monospace"
                                                 },
-                                                className: "jsx-c7a89359c4291cf8" + " " + "ml-2 px-2 bg-red-500 text-white rounded-lg hover:bg-red-600",
+                                                className: "jsx-cb4c8906e2eb1b52" + " " + "ml-2 px-2 bg-red-500 text-white rounded-lg hover:bg-red-600",
                                                 children: "Remove"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/language-mood/page.js",
-                                                lineNumber: 144,
+                                                lineNumber: 148,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, movie.id, true, {
                                         fileName: "[project]/src/app/language-mood/page.js",
-                                        lineNumber: 138,
+                                        lineNumber: 142,
                                         columnNumber: 15
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/language-mood/page.js",
-                                lineNumber: 136,
+                                lineNumber: 140,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/language-mood/page.js",
-                        lineNumber: 132,
+                        lineNumber: 136,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -419,38 +425,38 @@ function MoviePreferenceSelector() {
                             textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
                         },
                         "aria-label": "Proceed to movie recommendation",
-                        className: "jsx-c7a89359c4291cf8" + " " + "mt-6 px-6 py-2 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-500 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed",
+                        className: "jsx-cb4c8906e2eb1b52" + " " + "mt-6 px-6 py-2 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-600 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed",
                         children: "Next"
                     }, void 0, false, {
                         fileName: "[project]/src/app/language-mood/page.js",
-                        lineNumber: 156,
+                        lineNumber: 160,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/language-mood/page.js",
-                lineNumber: 73,
+                lineNumber: 77,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 style: {
                     textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)"
                 },
-                className: "jsx-c7a89359c4291cf8" + " " + "absolute bottom-4 text-gray-400 text-sm opacity-70 z-20",
+                className: "jsx-cb4c8906e2eb1b52" + " " + "absolute bottom-4 text-gray-400 text-sm opacity-70 z-20",
                 children: "Powered by subreddit sentiment analysis"
             }, void 0, false, {
                 fileName: "[project]/src/app/language-mood/page.js",
-                lineNumber: 166,
+                lineNumber: 170,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$styled$2d$jsx$2f$style$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
-                id: "c7a89359c4291cf8",
-                children: "@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-in.jsx-c7a89359c4291cf8{animation:.3s ease-out forwards fadeIn}.scrollbar-none.jsx-c7a89359c4291cf8{scrollbar-width:none}.scrollbar-none.jsx-c7a89359c4291cf8::-webkit-scrollbar{display:none}"
+                id: "cb4c8906e2eb1b52",
+                children: "@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-in.jsx-cb4c8906e2eb1b52{animation:.3s ease-out forwards fadeIn}.scrollbar-none.jsx-cb4c8906e2eb1b52{scrollbar-width:none}.scrollbar-none.jsx-cb4c8906e2eb1b52::-webkit-scrollbar{display:none}"
             }, void 0, false, void 0, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/language-mood/page.js",
-        lineNumber: 58,
+        lineNumber: 62,
         columnNumber: 5
     }, this);
 }
