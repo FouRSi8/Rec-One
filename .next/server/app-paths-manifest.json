@@ -1,3 +1,7 @@
 {
+  "/api/movies/route": "app/api/movies/route.js",
+  "/api/recommendations/route": "app/api/recommendations/route.js",
+  "/language-mood/page": "app/language-mood/page.js",
+  "/movie/page": "app/movie/page.js",
   "/page": "app/page.js"
 }

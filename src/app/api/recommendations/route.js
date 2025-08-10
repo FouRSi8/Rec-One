@@ -70,6 +70,22 @@ export async function GET(request) {
     const movieAnalysis = await analyzeInputMoviesEnhanced(inputMovies);
     console.log("Movie analysis:", movieAnalysis);
 
+    // NEW: Compute allowedLanguages based on input movies' languages
+    const inputLanguages = new Set(inputMovies.map(m => m.original_language));
+    let allowedLanguages;
+    if (inputLanguages.size === 3) {
+      allowedLanguages = Array.from(inputLanguages);
+    } else {
+      const langCounts = {};
+      inputMovies.forEach(m => {
+        const lang = m.original_language;
+        langCounts[lang] = (langCounts[lang] || 0) + 1;
+      });
+      const commonLang = Object.entries(langCounts).find(([lang, count]) => count >= 2)?.[0];
+      allowedLanguages = commonLang ? [commonLang] : []; // Fallback to empty if no common (edge case)
+    }
+    console.log("Allowed languages for recommendations:", allowedLanguages);
+
     let redditRecommendations = [];
     let redditError = null;
     
@@ -91,7 +107,7 @@ export async function GET(request) {
 
     const strategies = await getEnhancedStrategiesWithTMDB(inputMovies, movieAnalysis, TMDB_API_KEY, axiosConfig, minYear, maxYear);
 
-    const allRecommendations = [];
+    let allRecommendations = []; // Changed from const to let
 
     if (redditRecommendations.length > 0) {
       const redditCandidates = await enhanceRedditRecommendationsWithTMDB(
@@ -182,6 +198,12 @@ export async function GET(request) {
         });
       }
     }
+
+    // NEW: Apply language filter to the full initial pool (after fallback if needed)
+    allRecommendations = allRecommendations.filter(candidate => 
+      allowedLanguages.includes(candidate.original_language)
+    );
+    console.log(`Recommendations after language filter: ${allRecommendations.length}`);
 
     if (allRecommendations.length === 0) {
       throw new Error("No recommendations found for the specified year range");
@@ -904,11 +926,14 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       thematicBonus: 0
     };
     
+    // Base scoring: vote average and capped popularity
     totalScore += (candidate.vote_average || 0) * 4;
-    totalScore += Math.log10((candidate.popularity || 1)) * 10;
+    totalScore += Math.min(Math.log10(candidate.popularity || 1) * 10, 50); // Cap popularity influence
     
+    // Strategy priority
     totalScore += (candidate.strategyPriority || 0) * 8;
     
+    // Reddit data scoring
     if (candidate.redditData) {
       totalScore += (candidate.redditData.redditScore || 0) * 0.05;
       totalScore += (candidate.redditData.mentions || 0) * 1;
@@ -916,6 +941,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       totalScore += candidate.redditData.subreddits?.length || 0 * 2;
     }
     
+    // Director matching
     const inputDirectors = inputMovies.flatMap(m => 
       m.credits?.crew?.filter(c => c.job === 'Director').map(d => d.name) || []
     );
@@ -931,22 +957,24 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       
       if (isSuperheroInput && isSuperhero) {
         console.log(`Applying superhero theme bonus to: ${candidate.title}`);
-        totalScore += 200; // Reduced from 300
+        totalScore += 200;
       }
     }
     
+    // Superhero strategy bonus
     if (candidate.strategyName === 'Superhero/Comic Book Movies') {
       console.log(`Applying superhero strategy bonus to: ${candidate.title}`);
-      totalScore += 200; // Reduced from 400
+      totalScore += 200;
       
       if (candidate.release_date) {
         const releaseYear = new Date(candidate.release_date).getFullYear();
         if (releaseYear >= 2024) {
-          totalScore += 100; // Reduced from 200
+          totalScore += 100;
         }
       }
     }
     
+    // Superhero theme indicators
     const superheroIndicators = [
       'superman', 'batman', 'superhero', 'comic book', 'marvel', 'dc comics',
       'hero', 'powers', 'cape', 'villain', 'justice', 'save the world'
@@ -959,7 +987,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       ).length;
       
       if (superheroMatches > 0) {
-        const themeBonus = Math.min(superheroMatches * 50, 100); // Capped at 100
+        const themeBonus = Math.min(superheroMatches * 50, 100);
         if (isSuperheroInput) {
           totalScore += themeBonus;
           genreMatchDetails.thematicBonus += themeBonus;
@@ -968,6 +996,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       }
     }
     
+    // Genre matching
     if (analysis.genreAnalysis.primaryGenre && candidate.genre_ids) {
       const candidateGenres = candidate.genre_ids;
       
@@ -998,17 +1027,36 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       }
     }
     
+    // Enhanced thematic matching
+    const racingKeywords = ['racing', 'formula one', 'car', 'racecar'];
+    const isRacingInput = analysis.thematicAnalysis.commonKeywords.some(k => 
+      racingKeywords.includes(k.name.toLowerCase())
+    );
+    
     if (analysis.thematicAnalysis.commonKeywords.length > 0 && candidate.overview) {
       const overviewLower = candidate.overview.toLowerCase();
       analysis.thematicAnalysis.commonKeywords.forEach(keyword => {
         if (overviewLower.includes(keyword.name.toLowerCase())) {
-          const thematicBonus = 20 * keyword.count;
+          const thematicBonus = 100 * keyword.count; // Increased from 20
           totalScore += thematicBonus;
           genreMatchDetails.thematicBonus += thematicBonus;
+          console.log(`Applied thematic bonus for "${keyword.name}" to ${candidate.title}: +${thematicBonus}`);
         }
       });
+      
+      // Penalize non-racing movies if input is racing-themed
+      const isRacingThemed = racingKeywords.some(k => overviewLower.includes(k)) ||
+                            analysis.thematicAnalysis.commonKeywords.some(k => 
+                              overviewLower.includes(k.name.toLowerCase())
+                            );
+      
+      if (isRacingInput && !isRacingThemed) {
+        totalScore -= 300; // Strong penalty for non-racing movies
+        console.log(`Penalizing ${candidate.title} for lacking racing theme: -300`);
+      }
     }
     
+    // Franchise matching
     if (analysis.franchisePattern) {
       const titleLower = (candidate.title || '').toLowerCase();
       const inputTitlesWithFranchise = inputMovies.filter(m => 
@@ -1016,7 +1064,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       ).length;
       
       if (titleLower.includes(analysis.franchisePattern.toLowerCase())) {
-        let franchiseBonus = inputTitlesWithFranchise >= 3 ? 1000 : inputTitlesWithFranchise >= 2 ? 600 : 200;
+        let franchiseBonus = inputTitlesWithFranchise >= 3 ? 1200 : inputTitlesWithFranchise >= 2 ? 700 : 300; // Increased bonuses
         if (genreMatchDetails.dominantGenreMatch) {
           franchiseBonus += 100;
         }
@@ -1036,6 +1084,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       });
     }
     
+    // Quality alignment
     const qualityAlignment = calculateQualityAlignment(candidate, analysis.qualityIndicators);
     totalScore += qualityAlignment * 15;
     
@@ -1043,11 +1092,13 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       totalScore += 50;
     }
     
+    // Rating alignment
     const ratingDiff = Math.abs((candidate.vote_average || 0) - analysis.avgRating);
     if (ratingDiff <= 0.5) totalScore += 25;
     else if (ratingDiff <= 1) totalScore += 15;
     else if (ratingDiff <= 1.5) totalScore += 8;
     
+    // Language matching
     if (analysis.commonLanguage && candidate.original_language === analysis.commonLanguage) {
       let langBonus = 50;
       if (analysis.commonLanguage !== 'en') {
@@ -1056,6 +1107,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       totalScore += langBonus;
     }
     
+    // Animation/anime checks
     if (analysis.isAnime && candidate.original_language === 'ja') {
       totalScore += 100;
     }
@@ -1066,7 +1118,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       totalScore += 100;
     }
     
-    // Skip recency bonus for franchise matches
+    // Recency bonus (skipped for franchise matches)
     if (!candidate.title.toLowerCase().includes(analysis.franchisePattern?.toLowerCase() || '')) {
       if (candidate.release_date) {
         const releaseYear = new Date(candidate.release_date).getFullYear();
@@ -1078,6 +1130,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
       }
     }
     
+    // Additional reliability scores
     const popularityScore = Math.log10((candidate.popularity || 1)) * 3;
     const qualityScore = (candidate.vote_average || 0) * 8;
     const voteCountReliability = candidate.vote_count >= 500 ? 20 : 
@@ -1086,6 +1139,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
     
     totalScore += popularityScore + qualityScore + voteCountReliability;
     
+    // Genre overlap and diversity
     const inputGenreIds = inputMovies.flatMap(m => m.genres?.map(g => g.id) || []);
     const candidateGenreIds = candidate.genre_ids || [];
     const genreOverlap = candidateGenreIds.filter(g => inputGenreIds.includes(g)).length;
@@ -1094,10 +1148,12 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
     totalScore += genreOverlap * 12;
     totalScore += Math.min(genreDiversity * 4, 12);
     
+    // Vote count bonus
     if (candidate.vote_count >= 5000) totalScore += 25;
     else if (candidate.vote_count >= 1000) totalScore += 15;
     else if (candidate.vote_count >= 500) totalScore += 10;
     
+    // Penalize non-action/adventure/scifi movies unless specific strategy
     if (candidate.genre_ids && !candidate.genre_ids.some(id => [28, 878, 12].includes(id))) {
       if (!candidate.strategyName?.startsWith('Same Director') && 
           candidate.strategyName !== 'Superhero/Comic Book Movies') {
@@ -1114,6 +1170,7 @@ function scoreRecommendationsEnhanced(allRecommendations, inputMovies, analysis)
     };
   });
 }
+
 function calculateQualityAlignment(candidate, qualityIndicators) {
   const candidateRating = candidate.vote_average || 0;
   const candidatePopularity = candidate.popularity || 0;
