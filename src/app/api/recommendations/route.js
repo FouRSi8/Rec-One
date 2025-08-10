@@ -5,6 +5,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const movieIds = searchParams.get("movieIds")?.split(",");
   const year = searchParams.get("year");
+  const otherLanguages = searchParams.get("otherLanguages") === 'true';
 
   const axiosConfig = { timeout: 8000 };
   
@@ -105,9 +106,9 @@ export async function GET(request) {
       }
     }
 
-    const strategies = await getEnhancedStrategiesWithTMDB(inputMovies, movieAnalysis, TMDB_API_KEY, axiosConfig, minYear, maxYear);
+    const strategies = await getEnhancedStrategiesWithTMDB(inputMovies, movieAnalysis, TMDB_API_KEY, axiosConfig, minYear, maxYear, allowedLanguages, otherLanguages);
 
-    let allRecommendations = []; // Changed from const to let
+    let allRecommendations = [];
 
     if (redditRecommendations.length > 0) {
       const redditCandidates = await enhanceRedditRecommendationsWithTMDB(
@@ -139,9 +140,9 @@ export async function GET(request) {
         let candidates = [];
 
         if (strategy.customSearch) {
-          candidates = await strategy.customSearch(TMDB_API_KEY, axiosConfig, resolvedIds, minYear, maxYear);
+          candidates = await strategy.customSearch(TMDB_API_KEY, axiosConfig, resolvedIds, minYear, maxYear, allowedLanguages, otherLanguages);
         } else {
-          const params = strategy.getParams();
+          const params = strategy.getParams(allowedLanguages, otherLanguages);
           if (!params) return [];
 
           let discoveryUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}`;
@@ -188,7 +189,7 @@ export async function GET(request) {
     console.log(`Total recommendations collected: ${allRecommendations.length}`);
 
     if (allRecommendations.length === 0) {
-      const fallbackMovie = await getEnhancedFallback(inputMovies, movieAnalysis, TMDB_API_KEY, axiosConfig, resolvedIds, minYear, maxYear);
+      const fallbackMovie = await getEnhancedFallback(inputMovies, movieAnalysis, TMDB_API_KEY, axiosConfig, resolvedIds, minYear, maxYear, allowedLanguages, otherLanguages);
       if (fallbackMovie) {
         allRecommendations.push({
           ...fallbackMovie,
@@ -200,9 +201,13 @@ export async function GET(request) {
     }
 
     // NEW: Apply language filter to the full initial pool (after fallback if needed)
-    allRecommendations = allRecommendations.filter(candidate => 
-      allowedLanguages.includes(candidate.original_language)
-    );
+    allRecommendations = allRecommendations.filter(candidate => {
+      if (otherLanguages) {
+        return candidate.original_language && !allowedLanguages.includes(candidate.original_language);
+      } else {
+        return allowedLanguages.includes(candidate.original_language);
+      }
+    });
     console.log(`Recommendations after language filter: ${allRecommendations.length}`);
 
     if (allRecommendations.length === 0) {
@@ -492,7 +497,7 @@ function analyzeInputMoviesEnhanced(inputMovies) {
   });
 }
 
-async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY, axiosConfig, minYear, maxYear) {
+async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY, axiosConfig, minYear, maxYear, allowedLanguages, otherLanguages) {
   const genres = inputMovies.map(m => m.genres || []);
   const directors = inputMovies.map(m => 
     m.credits.crew?.filter(c => c.job === 'Director') || []
@@ -502,16 +507,18 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
 
   const strategies = [];
 
-  if (analysis.commonLanguage) {
+  if (analysis.commonLanguage && !otherLanguages) {
     strategies.push({
       name: `${analysis.commonLanguage.toUpperCase()} Language Films`,
       priority: 30,
-      getParams: () => {
+      getParams: (allowedLanguages, otherLanguages) => {
         const params = {
-          with_original_language: analysis.commonLanguage,
           sort_by: 'vote_average.desc',
           'vote_count.gte': 100
         };
+        if (!otherLanguages && allowedLanguages.length > 0) {
+          params.with_original_language = allowedLanguages.join('|');
+        }
         if (analysis.genreAnalysis.primaryGenre) {
           params.with_genres = analysis.genreAnalysis.primaryGenre.id;
         }
@@ -534,14 +541,14 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
     strategies.push({
       name: `Dominant ${primaryGenre.name} Films`,
       priority: 25,
-      getParams: () => {
+      getParams: (allowedLanguages, otherLanguages) => {
         const params = {
           with_genres: primaryGenre.id,
           sort_by: 'vote_average.desc',
           'vote_count.gte': analysis.qualityIndicators.qualityTier === 'premium' ? 1000 : 500
         };
-        if (analysis.commonLanguage) {
-          params.with_original_language = analysis.commonLanguage;
+        if (!otherLanguages && allowedLanguages.length > 0) {
+          params.with_original_language = allowedLanguages.join('|');
         }
         const secondaryRecurringGenres = analysis.genreAnalysis.secondaryGenres
           .filter(g => g.count > 1)
@@ -565,7 +572,7 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
       strategies.push({
         name: `${analysis.genreAnalysis.genreCombo} Combination`,
         priority: 22,
-        getParams: () => {
+        getParams: (allowedLanguages, otherLanguages) => {
           const recurringGenres = analysis.genreAnalysis.dominantGenres
             .filter(g => g.count > 1)
             .slice(0, 3);
@@ -575,8 +582,8 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
             sort_by: 'vote_average.desc',
             'vote_count.gte': 300
           };
-          if (analysis.commonLanguage) {
-            params.with_original_language = analysis.commonLanguage;
+          if (!otherLanguages && allowedLanguages.length > 0) {
+            params.with_original_language = allowedLanguages.join('|');
           }
           if (analysis.isAnimated === false) {
             params.without_genres = '16';
@@ -593,7 +600,7 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
     strategies.push({
       name: "Same Franchise/Series",
       priority: basePriority,
-      customSearch: async (apiKey, config, excludeIds, minYear, maxYear) => {
+      customSearch: async (apiKey, config, excludeIds, minYear, maxYear, allowedLanguages, otherLanguages) => {
         const franchiseTerms = analysis.franchiseKeywords.length > 0 
           ? analysis.franchiseKeywords 
           : [analysis.franchisePattern];
@@ -605,8 +612,8 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
         for (const term of franchiseTerms.slice(0, 3)) {
           try {
             let searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(term)}&sort_by=vote_average.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
-            if (analysis.commonLanguage) {
-              searchUrl += `&with_original_language=${analysis.commonLanguage}`;
+            if (!otherLanguages && allowedLanguages.length > 0) {
+              searchUrl += `&with_original_language=${allowedLanguages.join('|')}`;
             }
             
             const searchResponse = await axios.get(searchUrl, config);
@@ -644,7 +651,7 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
     strategies.push({
       name: "Superhero/Comic Book Movies",
       priority: 26,
-      customSearch: async (apiKey, config, excludeIds, minYear, maxYear) => {
+      customSearch: async (apiKey, config, excludeIds, minYear, maxYear, allowedLanguages, otherLanguages) => {
         try {
           const superheroKeywords = ['9715', '180547', '849'];
           const marvelCompanies = ['420', '7505'];
@@ -653,16 +660,20 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
           const searches = [];
           
           for (const keywordId of superheroKeywords) {
-            searches.push(
-              axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_keywords=${keywordId}&sort_by=release_date.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31&vote_count.gte=50`, config)
-            );
+            let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_keywords=${keywordId}&sort_by=release_date.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31&vote_count.gte=50`;
+            if (!otherLanguages && allowedLanguages.length > 0) {
+              url += `&with_original_language=${allowedLanguages.join('|')}`;
+            }
+            searches.push(axios.get(url, config));
           }
           
           const allCompanies = [...marvelCompanies, ...dcCompanies];
           for (const companyId of allCompanies) {
-            searches.push(
-              axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_companies=${companyId}&sort_by=release_date.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31&vote_count.gte=50`, config)
-            );
+            let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_companies=${companyId}&sort_by=release_date.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31&vote_count.gte=50`;
+            if (!otherLanguages && allowedLanguages.length > 0) {
+              url += `&with_original_language=${allowedLanguages.join('|')}`;
+            }
+            searches.push(axios.get(url, config));
           }
           
           const results = await Promise.allSettled(searches);
@@ -696,7 +707,7 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
     strategies.push({
       name: `Thematic Match: ${topKeyword.name}`,
       priority: 16,
-      customSearch: async (apiKey, config, excludeIds, minYear, maxYear) => {
+      customSearch: async (apiKey, config, excludeIds, minYear, maxYear, allowedLanguages, otherLanguages) => {
         try {
           const keywordSearch = await axios.get(
             `https://api.themoviedb.org/3/search/keyword?api_key=${apiKey}&query=${encodeURIComponent(topKeyword.name)}`,
@@ -707,8 +718,8 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
             const keywordId = keywordSearch.data.results[0].id;
             
             let moviesUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_keywords=${keywordId}&sort_by=vote_average.desc&vote_count.gte=100&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
-            if (analysis.commonLanguage) {
-              moviesUrl += `&with_original_language=${analysis.commonLanguage}`;
+            if (!otherLanguages && allowedLanguages.length > 0) {
+              moviesUrl += `&with_original_language=${allowedLanguages.join('|')}`;
             }
             if (analysis.isAnimated === false) {
               moviesUrl += `&without_genres=16`;
@@ -732,12 +743,12 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
     strategies.push({
       name: "Anime Movies",
       priority: 35,
-      customSearch: async (apiKey, config, excludeIds, minYear, maxYear) => {
+      customSearch: async (apiKey, config, excludeIds, minYear, maxYear, allowedLanguages, otherLanguages) => {
         const searches = [
-          axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_original_language=ja&with_genres=16&sort_by=vote_average.desc&vote_count.gte=50&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`, config),
-          axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_keywords=210024&sort_by=popularity.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`, config),
-          axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_companies=10342,2251&sort_by=vote_average.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`, config)
-        ];
+          `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_original_language=ja&with_genres=16&sort_by=vote_average.desc&vote_count.gte=50&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`,
+          `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_keywords=210024&sort_by=popularity.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`,
+          `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_companies=10342,2251&sort_by=vote_average.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`
+        ].map(url => axios.get(url, config));
         
         const results = await Promise.allSettled(searches);
         const allMovies = [];
@@ -758,14 +769,14 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
     strategies.push({
       name: "Animation Movies",
       priority: 13,
-      getParams: () => {
+      getParams: (allowedLanguages, otherLanguages) => {
         const params = {
           with_genres: '16',
           sort_by: 'vote_average.desc',
           'vote_count.gte': 500
         };
-        if (analysis.commonLanguage) {
-          params.with_original_language = analysis.commonLanguage;
+        if (!otherLanguages && allowedLanguages.length > 0) {
+          params.with_original_language = allowedLanguages.join('|');
         }
         return params;
       }
@@ -786,12 +797,15 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
       strategies.push({
         name: `Same Director: ${commonDirector}`,
         priority: 35,
-        customSearch: async (apiKey, config, excludeIds, minYear, maxYear) => {
+        customSearch: async (apiKey, config, excludeIds, minYear, maxYear, allowedLanguages, otherLanguages) => {
           try {
             console.log(`Searching for movies by director ${commonDirector} (${directorId}) between ${minYear} and ${maxYear}`);
             
             let directorUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_crew=${directorId}&sort_by=release_date.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
             
+            if (!otherLanguages && allowedLanguages.length > 0) {
+              directorUrl += `&with_original_language=${allowedLanguages.join('|')}`;
+            }
             if (analysis.isAnimated === false) {
               directorUrl += `&without_genres=16`;
             }
@@ -867,13 +881,13 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
       strategies.push({
         name: "Same Studio Production",
         priority: 9,
-        getParams: () => {
+        getParams: (allowedLanguages, otherLanguages) => {
           const params = {
             with_companies: studioId,
             sort_by: 'vote_average.desc'
           };
-          if (analysis.commonLanguage) {
-            params.with_original_language = analysis.commonLanguage;
+          if (!otherLanguages && allowedLanguages.length > 0) {
+            params.with_original_language = allowedLanguages.join('|');
           }
           if (analysis.isAnimated === false) {
             params.without_genres = '16';
@@ -1410,13 +1424,13 @@ function extractMovieRecommendationsEnhanced(postData, inputMovies, analysis) {
   return uniqueRecs.slice(0, 8);
 }
 
-async function getEnhancedFallback(inputMovies, analysis, apiKey, axiosConfig, resolvedIds, minYear, maxYear) {
+async function getEnhancedFallback(inputMovies, analysis, apiKey, axiosConfig, resolvedIds, minYear, maxYear, allowedLanguages, otherLanguages) {
   try {
     if (analysis.franchisePattern) {
       console.log("Trying franchise fallback for:", analysis.franchisePattern);
       let searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(analysis.franchisePattern)}&sort_by=vote_average.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
-      if (analysis.commonLanguage) {
-        searchUrl += `&with_original_language=${analysis.commonLanguage}`;
+      if (!otherLanguages && allowedLanguages.length > 0) {
+        searchUrl += `&with_original_language=${allowedLanguages.join('|')}`;
       }
       if (analysis.isAnimated === false) {
         searchUrl += `&without_genres=16`;
@@ -1457,10 +1471,14 @@ async function getEnhancedFallback(inputMovies, analysis, apiKey, axiosConfig, r
       }
     }
 
-    if (analysis.commonLanguage) {
-      console.log("Trying language-based fallback for:", analysis.commonLanguage);
+    if (analysis.commonLanguage || allowedLanguages.length > 0) {
+      console.log("Trying language-based fallback");
       
-      let langQuery = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_original_language=${analysis.commonLanguage}&sort_by=vote_average.desc&vote_count.gte=100&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
+      let langQuery = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=vote_average.desc&vote_count.gte=100&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
+      
+      if (!otherLanguages && allowedLanguages.length > 0) {
+        langQuery += `&with_original_language=${allowedLanguages.join('|')}`;
+      }
       
       if (analysis.genreAnalysis.primaryGenre) {
         langQuery += `&with_genres=${analysis.genreAnalysis.primaryGenre.id}`;
@@ -1494,6 +1512,9 @@ async function getEnhancedFallback(inputMovies, analysis, apiKey, axiosConfig, r
                           analysis.qualityIndicators.qualityTier === 'good' ? 500 : 100;
       
       let genreQuery = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${analysis.genreAnalysis.primaryGenre.id}&sort_by=vote_average.desc&vote_count.gte=${voteCountMin}&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
+      if (!otherLanguages && allowedLanguages.length > 0) {
+        genreQuery += `&with_original_language=${allowedLanguages.join('|')}`;
+      }
       if (analysis.isAnimated === false) {
         genreQuery += `&without_genres=16`;
       }
@@ -1514,8 +1535,8 @@ async function getEnhancedFallback(inputMovies, analysis, apiKey, axiosConfig, r
     if (analysis.isAnimated) {
       let animQuery = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=16&sort_by=vote_average.desc&vote_count.gte=100&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
       
-      if (analysis.commonLanguage) {
-        animQuery += `&with_original_language=${analysis.commonLanguage}`;
+      if (!otherLanguages && allowedLanguages.length > 0) {
+        animQuery += `&with_original_language=${allowedLanguages.join('|')}`;
       }
       
       const animResponse = await axios.get(animQuery, axiosConfig);

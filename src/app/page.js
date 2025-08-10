@@ -17,6 +17,16 @@ export default function YearSelector() {
   // Sample changelog data - replace with your actual changelog
   const changelog = [
     {
+      version: "1.3",
+      date: "2025-08-10",
+      changes: [
+        "Introduced Other Language filter-",
+        "Now you can get more movies of a different language with the same criteria",
+        "Other minor bug fixes"
+
+      ]
+    },
+    {
       version: "1.2",
       date: "2025-08-10",
       changes: [
@@ -29,7 +39,7 @@ export default function YearSelector() {
     },
     {
       version: "1.1",
-      date: "2024-08-09",
+      date: "2025-08-09",
       changes: [
         "Introduced range selection functionality",
         "Added visual feedback for selected years",
@@ -39,7 +49,7 @@ export default function YearSelector() {
     },
     {
       version: "1.0",
-      date: "2024-08-09",
+      date: "2025-08-09",
       changes: [
         "Initial release of Rec'One",
         "Basic year selection functionality",

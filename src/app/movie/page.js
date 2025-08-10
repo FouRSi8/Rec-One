@@ -1,5 +1,4 @@
 "use client";
-"use client";
 
 import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -19,6 +18,7 @@ function MovieRecommendationContent() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [useOtherLanguages, setUseOtherLanguages] = useState(false);
   const abortControllerRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -60,7 +60,12 @@ function MovieRecommendationContent() {
       return;
     }
 
-    fetch(`/api/recommendations?movieIds=${movieIds.join(",")}&year=${year}`, { signal })
+    let fetchUrl = `/api/recommendations?movieIds=${movieIds.join(",")}&year=${year}`;
+    if (useOtherLanguages) {
+      fetchUrl += `&otherLanguages=true`;
+    }
+
+    fetch(fetchUrl, { signal })
       .then((response) => {
         if (signal.aborted) return null;
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -125,7 +130,7 @@ function MovieRecommendationContent() {
         abortControllerRef.current.abort();
       }
     };
-  }, [movieIds, year]);
+  }, [movieIds, year, useOtherLanguages]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -182,6 +187,10 @@ function MovieRecommendationContent() {
     } else {
       console.log("Reached the last recommendation");
     }
+  };
+
+  const handleOtherLanguages = () => {
+    setUseOtherLanguages(true);
   };
 
   const currentRecommendation = recommendations[currentIndex];
@@ -271,6 +280,15 @@ function MovieRecommendationContent() {
                   aria-label="Back to movie selection"
                 >
                   Back to Matrix
+                </button>
+                <button
+                  onClick={handleOtherLanguages}
+                  disabled={useOtherLanguages}
+                  className="px-4 py-2 bg-blue-500 text-black font-semibold rounded-md hover:bg-blue-600 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)" }}
+                  aria-label="View recommendations in other languages"
+                >
+                  {useOtherLanguages ? "Loading Other Languages..." : "Other Languages"}
                 </button>
               </div>
             </div>
