@@ -339,7 +339,7 @@ async function GET(request) {
                         return releaseYear >= minYear && releaseYear <= maxYear;
                     }
                     return false;
-                }).slice(0, 5);
+                }).slice(0, otherLanguages ? 20 : 5);
                 return candidates.map((candidate)=>({
                         ...candidate,
                         strategyName: strategy.name,
@@ -383,7 +383,21 @@ async function GET(request) {
         }
         const scoredRecommendations = scoreRecommendationsEnhanced(allRecommendations, inputMovies, movieAnalysis);
         scoredRecommendations.sort((a, b)=>b.totalScore - a.totalScore);
-        const topRecommendations = scoredRecommendations.slice(0, 5);
+        let topRecommendations;
+        if (otherLanguages) {
+            const uniqueLangRecs = [];
+            const seenLangs = new Set();
+            for (const rec of scoredRecommendations){
+                if (rec.original_language && !seenLangs.has(rec.original_language)) {
+                    seenLangs.add(rec.original_language);
+                    uniqueLangRecs.push(rec);
+                    if (uniqueLangRecs.length === 5) break;
+                }
+            }
+            topRecommendations = uniqueLangRecs;
+        } else {
+            topRecommendations = scoredRecommendations.slice(0, 5);
+        }
         const detailedRecommendations = await Promise.all(topRecommendations.map(async (rec)=>{
             try {
                 const detailedMovie = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].get(`https://api.themoviedb.org/3/movie/${rec.id}?api_key=${TMDB_API_KEY1}&append_to_response=credits`, axiosConfig1);
@@ -722,6 +736,9 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
                         if (!otherLanguages && allowedLanguages.length > 0) {
                             searchUrl += `&with_original_language=${allowedLanguages.join('|')}`;
                         }
+                        if (analysis.genreAnalysis.primaryGenre) {
+                            searchUrl += `&with_genres=${analysis.genreAnalysis.primaryGenre.id}`;
+                        }
                         const searchResponse = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].get(searchUrl, config);
                         let results = searchResponse.data.results.filter((movie)=>{
                             if (excludeIds.includes(movie.id.toString())) return false;
@@ -816,6 +833,9 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
                         if (!otherLanguages && allowedLanguages.length > 0) {
                             moviesUrl += `&with_original_language=${allowedLanguages.join('|')}`;
                         }
+                        if (analysis.genreAnalysis.primaryGenre) {
+                            moviesUrl += `&with_genres=${analysis.genreAnalysis.primaryGenre.id}`;
+                        }
                         if (analysis.isAnimated === false) {
                             moviesUrl += `&without_genres=16`;
                         }
@@ -886,6 +906,9 @@ async function getEnhancedStrategiesWithTMDB(inputMovies, analysis, TMDB_API_KEY
                         let directorUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_crew=${directorId}&sort_by=release_date.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
                         if (!otherLanguages && allowedLanguages.length > 0) {
                             directorUrl += `&with_original_language=${allowedLanguages.join('|')}`;
+                        }
+                        if (analysis.genreAnalysis.primaryGenre) {
+                            directorUrl += `&with_genres=${analysis.genreAnalysis.primaryGenre.id}`;
                         }
                         if (analysis.isAnimated === false) {
                             directorUrl += `&without_genres=16`;
@@ -1475,6 +1498,9 @@ async function getEnhancedFallback(inputMovies, analysis, apiKey, axiosConfig1, 
             let searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(analysis.franchisePattern)}&sort_by=vote_average.desc&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
             if (!otherLanguages && allowedLanguages.length > 0) {
                 searchUrl += `&with_original_language=${allowedLanguages.join('|')}`;
+            }
+            if (analysis.genreAnalysis.primaryGenre) {
+                searchUrl += `&with_genres=${analysis.genreAnalysis.primaryGenre.id}`;
             }
             if (analysis.isAnimated === false) {
                 searchUrl += `&without_genres=16`;

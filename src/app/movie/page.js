@@ -254,6 +254,7 @@ function MovieRecommendationContent() {
                 <p className="text-lg"><strong>Writer:</strong> {currentRecommendation.credits?.crew?.filter(c => ['Writer', 'Screenplay', 'Story'].includes(c.job)).map(w => w.name).join(", ") || "N/A"}</p>
                 <p className="text-lg"><strong>Production:</strong> {currentRecommendation.production_companies?.map(c => c.name).join(", ") || "N/A"}</p>
                 <p className="text-lg"><strong>Music:</strong> {currentRecommendation.credits?.crew?.filter(c => ['Original Music Composer', 'Music'].includes(c.job)).map(m => m.name).join(", ") || "N/A"}</p>
+                <p className="text-lg"><strong>Original Language:</strong> {currentRecommendation.original_language?.toUpperCase() || "N/A"}</p>
               </div>
               <p className="text-lg"><strong>Summary:</strong> {currentRecommendation.overview?.substring(0, 200) || "No summary available."}{currentRecommendation.overview?.length > 200 ? "..." : ""}</p>
               {currentRecommendation.totalScore && currentRecommendation.totalScore > 0 && (
