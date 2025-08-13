@@ -17,6 +17,15 @@ export default function YearSelector() {
   // Sample changelog data
   const changelog = [
     {
+      version: "2.0",
+      date: "2025-08-13",
+      changes: [
+        "Android/IOS responsive",
+        "Top 5 cast display",
+        "Minor Bug fixes"
+      ]
+    },
+    {
       version: "1.3",
       date: "2025-08-10",
       changes: [
@@ -58,7 +67,15 @@ export default function YearSelector() {
     }
   ];
 
+  // Haptic feedback function
+  const triggerHaptic = (duration = 50) => {
+    if (navigator.vibrate) {
+      navigator.vibrate(duration);
+    }
+  };
+
   const handleYearClick = (year) => {
+    triggerHaptic(50); // Short vibration for year selection
     if (!firstClickedYear) {
       const newSelectedYears = Array.from(
         { length: currentYear - year + 1 },
@@ -82,12 +99,18 @@ export default function YearSelector() {
   };
 
   const handleNext = () => {
+    triggerHaptic(100); // Longer vibration for navigation
     if (selectedYears.length === 0) {
       alert('Please select at least one year.');
       return;
     }
     const yearRange = `${Math.min(...selectedYears)}-${Math.max(...selectedYears)}`;
     router.push(`/language-mood?year=${yearRange}`);
+  };
+
+  const handleChangelogToggle = () => {
+    triggerHaptic(50); // Short vibration for changelog toggle
+    setShowChangelog(!showChangelog);
   };
 
   useEffect(() => {
@@ -135,6 +158,7 @@ export default function YearSelector() {
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape' && showChangelog) {
+        triggerHaptic(50); // Short vibration for closing modal
         setShowChangelog(false);
       }
     };
@@ -155,7 +179,7 @@ export default function YearSelector() {
       
       {/* Changelog Button */}
       <button
-        onClick={() => setShowChangelog(true)}
+        onClick={handleChangelogToggle}
         className="fixed top-4 right-4 group flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-800/80 hover:bg-green-500/20 border border-green-500/30 hover:border-green-400 text-green-400 hover:text-green-300 rounded-lg transition-all duration-300 backdrop-blur-sm z-30 transform hover:scale-105 touch-target"
         style={{ 
           fontFamily: "'Courier New', monospace", 
@@ -234,7 +258,7 @@ export default function YearSelector() {
       {showChangelog && (
         <div 
           className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
-          onClick={(e) => e.target === e.currentTarget && setShowChangelog(false)}
+          onClick={(e) => e.target === e.currentTarget && handleChangelogToggle()}
         >
           <div className="bg-gray-900/95 border border-green-500/30 rounded-xl shadow-2xl w-[95%] sm:w-full max-w-lg sm:max-w-2xl max-h-[80vh] overflow-hidden backdrop-blur-md animate-slide-up">
             {/* Modal Header */}
@@ -255,7 +279,7 @@ export default function YearSelector() {
                 </h2>
               </div>
               <button
-                onClick={() => setShowChangelog(false)}
+                onClick={handleChangelogToggle}
                 className="text-gray-400 hover:text-white transition-colors duration-200 p-2 hover:bg-gray-800 rounded-lg group touch-target"
                 aria-label="Close changelog"
               >
@@ -318,7 +342,7 @@ export default function YearSelector() {
                   Press <kbd className="px-2 py-1 bg-gray-800 rounded text-green-400 border border-green-500/30">ESC</kbd> to close
                 </p>
                 <button
-                  onClick={() => setShowChangelog(false)}
+                  onClick={handleChangelogToggle}
                   className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 rounded-lg transition-all duration-200 text-xs sm:text-sm font-mono hover:scale-105 touch-target"
                 >
                   CLOSE
