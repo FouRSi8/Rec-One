@@ -55,7 +55,13 @@ export async function GET(request) {
         ]);
         return {
           ...movieDetails.data,
-          credits: credits.data,
+          credits: {
+            ...credits.data,
+            cast: credits.data.cast.slice(0, 5).map(actor => ({
+              name: actor.name,
+              profile_path: actor.profile_path || null
+            }))
+          },
           keywords: keywords.data.keywords || [],
           belongs_to_collection: movieDetails.data.belongs_to_collection || null
         };
@@ -71,7 +77,6 @@ export async function GET(request) {
     const movieAnalysis = await analyzeInputMoviesEnhanced(inputMovies);
     console.log("Movie analysis:", movieAnalysis);
 
-    // NEW: Compute allowedLanguages based on input movies' languages
     const inputLanguages = new Set(inputMovies.map(m => m.original_language));
     let allowedLanguages;
     if (inputLanguages.size === 3) {
@@ -83,7 +88,7 @@ export async function GET(request) {
         langCounts[lang] = (langCounts[lang] || 0) + 1;
       });
       const commonLang = Object.entries(langCounts).find(([lang, count]) => count >= 2)?.[0];
-      allowedLanguages = commonLang ? [commonLang] : []; // Fallback to empty if no common (edge case)
+      allowedLanguages = commonLang ? [commonLang] : [];
     }
     console.log("Allowed languages for recommendations:", allowedLanguages);
 
@@ -200,7 +205,6 @@ export async function GET(request) {
       }
     }
 
-    // NEW: Apply language filter to the full initial pool (after fallback if needed)
     allRecommendations = allRecommendations.filter(candidate => {
       if (otherLanguages) {
         return candidate.original_language && !allowedLanguages.includes(candidate.original_language);
@@ -243,6 +247,13 @@ export async function GET(request) {
           );
           return {
             ...detailedMovie.data,
+            credits: {
+              ...detailedMovie.data.credits,
+              cast: detailedMovie.data.credits.cast.slice(0, 5).map(actor => ({
+                name: actor.name,
+                profile_path: actor.profile_path || null
+              }))
+            },
             totalScore: rec.totalScore,
             strategyUsed: rec.strategyName,
             strategyPriority: rec.strategyPriority,
@@ -282,7 +293,7 @@ export async function GET(request) {
   }
 }
 
-function analyzeInputMoviesEnhanced(inputMovies) {
+async function analyzeInputMoviesEnhanced(inputMovies) {
   const analysis = {
     isAnimated: false,
     isAnime: false,
@@ -391,7 +402,6 @@ function analyzeInputMoviesEnhanced(inputMovies) {
     analysis.isAnimated = true;
   }
 
-  // Improved franchise detection
   const stopwords = ['the', 'of', 'and', 'in', 'to', 'a', 'is', 'for', 'on', 'with', 'by', 'at'];
   
   async function detectFranchiseWithTMDB() {
@@ -418,7 +428,6 @@ function analyzeInputMoviesEnhanced(inputMovies) {
       };
     }
 
-    // Fallback: Check title words against TMDB collections
     const allWords = inputMovies.flatMap(m => 
       m.title.toLowerCase().split(/\s+|[^\w\s]/).filter(word => 
         word.length > 3 && !stopwords.includes(word)
@@ -1644,8 +1653,18 @@ async function enhanceRedditRecommendationsWithTMDB(redditRecs, apiKey, axiosCon
         if (movieAnalysis.isAnime && 
             (bestMatch.original_language === 'ja' || bestMatch.genre_ids?.includes(16)) && 
             calculateTitleSimilarity(rec.title, bestMatch.title) > 0.3) {
+          const creditsResponse = await axios.get(
+            `https://api.themoviedb.org/3/movie/${bestMatch.id}/credits?api_key=${apiKey}`,
+            axiosConfig
+          );
           return {
             ...bestMatch,
+            credits: {
+              cast: creditsResponse.data.cast.slice(0, 5).map(actor => ({
+                name: actor.name,
+                profile_path: actor.profile_path || null
+              }))
+            },
             redditData: {
               originalTitle: rec.title,
               redditScore: rec.redditScore,
@@ -1661,8 +1680,18 @@ async function enhanceRedditRecommendationsWithTMDB(redditRecs, apiKey, axiosCon
                    bestMatch.vote_average >= (movieAnalysis.qualityIndicators.qualityTier === 'premium' ? 7.0 : 6.0) &&
                    (isFranchiseMatch || isGenreMatch) && 
                    calculateTitleSimilarity(rec.title, bestMatch.title) > 0.3) {
+          const creditsResponse = await axios.get(
+            `https://api.themoviedb.org/3/movie/${bestMatch.id}/credits?api_key=${apiKey}`,
+            axiosConfig
+          );
           return {
             ...bestMatch,
+            credits: {
+              cast: creditsResponse.data.cast.slice(0, 5).map(actor => ({
+                name: actor.name,
+                profile_path: actor.profile_path || null
+              }))
+            },
             redditData: {
               originalTitle: rec.title,
               redditScore: rec.redditScore,

@@ -30,13 +30,13 @@ function YearSelector() {
     const [selectedYears, setSelectedYears] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [firstClickedYear, setFirstClickedYear] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [showChangelog, setShowChangelog] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    // Sample changelog data - replace with your actual changelog
+    // Sample changelog data
     const changelog = [
         {
             version: "1.3",
             date: "2025-08-10",
             changes: [
-                "Introduced Other Language filter-",
+                "Introduced Other Language filter",
                 "Now you can get more movies of a different language with the same criteria",
                 "Other minor bug fixes"
             ]
@@ -75,20 +75,17 @@ function YearSelector() {
     ];
     const handleYearClick = (year)=>{
         if (!firstClickedYear) {
-            // First click: select from clicked year to current year
             const newSelectedYears = Array.from({
                 length: currentYear - year + 1
             }, (_, i)=>year + i);
             setSelectedYears(newSelectedYears);
             setFirstClickedYear(year);
         } else if (firstClickedYear === year) {
-            // Second click on same year: select only that year
             setSelectedYears([
                 year
             ]);
             setFirstClickedYear(null);
         } else {
-            // Second click on different year: select range between clicks
             const start = Math.min(firstClickedYear, year);
             const end = Math.max(firstClickedYear, year);
             const newSelectedYears = Array.from({
@@ -112,10 +109,16 @@ function YearSelector() {
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
-            canvas.height = window.innerHeight;
-            canvas.width = window.innerWidth;
+            const resizeCanvas = {
+                "YearSelector.useEffect.resizeCanvas": ()=>{
+                    canvas.height = window.innerHeight;
+                    canvas.width = window.innerWidth;
+                }
+            }["YearSelector.useEffect.resizeCanvas"];
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
             const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            const fontSize = 14;
+            const fontSize = window.innerWidth < 640 ? 10 : 14;
             const columns = canvas.width / fontSize;
             const drops = Array(Math.floor(columns)).fill(0);
             const draw = {
@@ -135,13 +138,6 @@ function YearSelector() {
                 }
             }["YearSelector.useEffect.draw"];
             const interval = setInterval(draw, 33);
-            const resizeCanvas = {
-                "YearSelector.useEffect.resizeCanvas": ()=>{
-                    canvas.height = window.innerHeight;
-                    canvas.width = window.innerWidth;
-                }
-            }["YearSelector.useEffect.resizeCanvas"];
-            window.addEventListener('resize', resizeCanvas);
             return ({
                 "YearSelector.useEffect": ()=>{
                     clearInterval(interval);
@@ -150,7 +146,6 @@ function YearSelector() {
             })["YearSelector.useEffect"];
         }
     }["YearSelector.useEffect"], []);
-    // Close modal on escape key
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "YearSelector.useEffect": ()=>{
             const handleEscape = {
@@ -173,25 +168,25 @@ function YearSelector() {
             fontFamily: "'Courier New', monospace",
             backgroundImage: "url('/matrix.jpg')"
         },
-        className: "jsx-65b20f082eacd316" + " " + "min-h-screen flex flex-col items-center justify-center bg-cover bg-center relative",
+        className: "jsx-8587291f1bf83338" + " " + "min-h-screen flex flex-col items-center justify-center bg-cover bg-center relative",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 style: {
                     backgroundColor: 'rgba(0, 0, 0, 0.6)',
                     zIndex: 0
                 },
-                className: "jsx-65b20f082eacd316" + " " + "absolute inset-0 backdrop-blur-md"
+                className: "jsx-8587291f1bf83338" + " " + "absolute inset-0 backdrop-blur-md"
             }, void 0, false, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 160,
+                lineNumber: 153,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("canvas", {
                 ref: canvasRef,
-                className: "jsx-65b20f082eacd316" + " " + "absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none z-10"
+                className: "jsx-8587291f1bf83338" + " " + "absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none z-10"
             }, void 0, false, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 161,
+                lineNumber: 154,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -201,138 +196,138 @@ function YearSelector() {
                     textShadow: '0 0 10px rgba(34, 197, 94, 0.5)'
                 },
                 "aria-label": "View changelog",
-                className: "jsx-65b20f082eacd316" + " " + "fixed top-6 right-6 group flex items-center gap-2 px-4 py-2 bg-gray-800/80 hover:bg-green-500/20 border border-green-500/30 hover:border-green-400 text-green-400 hover:text-green-300 rounded-lg transition-all duration-300 backdrop-blur-sm z-30 transform hover:scale-105",
+                className: "jsx-8587291f1bf83338" + " " + "fixed top-4 right-4 group flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-800/80 hover:bg-green-500/20 border border-green-500/30 hover:border-green-400 text-green-400 hover:text-green-300 rounded-lg transition-all duration-300 backdrop-blur-sm z-30 transform hover:scale-105 touch-target",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "jsx-65b20f082eacd316" + " " + "relative",
+                        className: "jsx-8587291f1bf83338" + " " + "relative",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "jsx-65b20f082eacd316" + " " + "w-3 h-3 bg-green-400 rounded-full animate-pulse"
+                                className: "jsx-8587291f1bf83338" + " " + "w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-pulse"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.js",
-                                lineNumber: 174,
+                                lineNumber: 167,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "jsx-65b20f082eacd316" + " " + "absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-ping opacity-75"
+                                className: "jsx-8587291f1bf83338" + " " + "absolute inset-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-ping opacity-75"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.js",
-                                lineNumber: 175,
+                                lineNumber: 168,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 173,
+                        lineNumber: 166,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                        className: "jsx-65b20f082eacd316" + " " + "text-sm font-mono",
+                        className: "jsx-8587291f1bf83338" + " " + "text-xs sm:text-sm font-mono",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                className: "jsx-65b20f082eacd316" + " " + "hidden sm:inline",
+                                className: "jsx-8587291f1bf83338" + " " + "hidden sm:inline",
                                 children: "CHANGELOG"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.js",
-                                lineNumber: 178,
+                                lineNumber: 171,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                className: "jsx-65b20f082eacd316" + " " + "sm:hidden",
+                                className: "jsx-8587291f1bf83338" + " " + "sm:hidden",
                                 children: "LOG"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.js",
-                                lineNumber: 179,
+                                lineNumber: 172,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 177,
+                        lineNumber: 170,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "jsx-65b20f082eacd316" + " " + "text-xs opacity-60 group-hover:opacity-100 transition-opacity duration-300",
+                        className: "jsx-8587291f1bf83338" + " " + "text-xs opacity-60 group-hover:opacity-100 transition-opacity duration-300",
                         children: [
                             "v",
                             changelog[0].version
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 181,
+                        lineNumber: 174,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 164,
+                lineNumber: 157,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
                 style: {
                     textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)'
                 },
-                className: "jsx-65b20f082eacd316" + " " + "text-6xl font-extrabold mb-8 text-white tracking-wider animate-pulse z-20",
+                className: "jsx-8587291f1bf83338" + " " + "text-4xl sm:text-6xl font-extrabold mb-6 sm:mb-8 text-white tracking-wider animate-pulse z-20",
                 children: "Rec'One"
             }, void 0, false, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 187,
+                lineNumber: 180,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-65b20f082eacd316" + " " + "text-center z-20",
+                className: "jsx-8587291f1bf83338" + " " + "text-center z-20 px-4 sm:px-0",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
                         style: {
                             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
                         },
-                        className: "jsx-65b20f082eacd316" + " " + "text-xl font-semibold text-gray-200 mb-4",
+                        className: "jsx-8587291f1bf83338" + " " + "text-lg sm:text-xl font-semibold text-gray-200 mb-4",
                         children: [
                             "Choose Movie Release Years ",
                             selectedYears.length > 0 ? "(".concat(Math.min(...selectedYears), "-").concat(Math.max(...selectedYears), ")") : ''
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 192,
+                        lineNumber: 185,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                         style: {
                             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
                         },
-                        className: "jsx-65b20f082eacd316" + " " + "text-sm mb-2 text-gray-300 italic z-20",
+                        className: "jsx-8587291f1bf83338" + " " + "text-xs sm:text-sm mb-2 text-gray-300 italic",
                         children: "Click Once to select all years ahead"
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 195,
+                        lineNumber: 188,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                         style: {
                             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
                         },
-                        className: "jsx-65b20f082eacd316" + " " + "text-sm mb-2 text-gray-300 italic z-20",
+                        className: "jsx-8587291f1bf83338" + " " + "text-xs sm:text-sm mb-2 text-gray-300 italic",
                         children: "Click Twice to select a specific year"
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 198,
+                        lineNumber: 191,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                         style: {
                             textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
                         },
-                        className: "jsx-65b20f082eacd316" + " " + "text-sm mb-6 text-gray-300 italic z-20",
+                        className: "jsx-8587291f1bf83338" + " " + "text-xs sm:text-sm mb-4 sm:mb-6 text-gray-300 italic",
                         children: "Click on two years to select the interval (inclusive)"
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 201,
+                        lineNumber: 194,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         role: "grid",
                         "aria-label": "Year selection grid",
-                        className: "jsx-65b20f082eacd316" + " " + "grid grid-cols-10 gap-2 max-w-2xl mx-auto p-4 max-h-96 overflow-y-auto scrollbar-none",
+                        className: "jsx-8587291f1bf83338" + " " + "grid grid-cols-5 sm:grid-cols-10 gap-1 sm:gap-2 max-w-full sm:max-w-2xl mx-auto p-2 sm:p-4 max-h-80 sm:max-h-96 overflow-y-auto scrollbar-none",
                         children: years.map((year)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                 onClick: ()=>handleYearClick(year),
                                 style: {
@@ -340,20 +335,20 @@ function YearSelector() {
                                     textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
                                 },
                                 "aria-label": "Select year ".concat(year),
-                                className: "jsx-65b20f082eacd316" + " " + "p-2 rounded-lg transition duration-200 ".concat(selectedYears.includes(year) ? 'bg-green-500 text-black' : 'bg-gray-800 text-gray-200 hover:bg-green-500 hover:text-black'),
+                                className: "jsx-8587291f1bf83338" + " " + "p-1.5 sm:p-2 rounded-lg transition duration-200 touch-target ".concat(selectedYears.includes(year) ? 'bg-green-500 text-black' : 'bg-gray-800 text-gray-200 hover:bg-green-500 hover:text-black'),
                                 children: year
                             }, year, false, {
                                 fileName: "[project]/src/app/page.js",
-                                lineNumber: 207,
+                                lineNumber: 200,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 205,
+                        lineNumber: 198,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "jsx-65b20f082eacd316" + " " + "flex justify-center gap-2 mt-2",
+                        className: "jsx-8587291f1bf83338" + " " + "flex justify-center gap-2 mt-4 sm:mt-2",
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                             onClick: handleNext,
                             disabled: selectedYears.length === 0,
@@ -362,71 +357,71 @@ function YearSelector() {
                                 textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
                             },
                             "aria-label": "Proceed to next step",
-                            className: "jsx-65b20f082eacd316" + " " + "px-6 py-2 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-600 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed",
+                            className: "jsx-8587291f1bf83338" + " " + "px-4 sm:px-6 py-1.5 sm:py-2 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-600 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed touch-target",
                             children: "Next"
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.js",
-                            lineNumber: 224,
+                            lineNumber: 217,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 223,
+                        lineNumber: 216,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 191,
+                lineNumber: 184,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 style: {
                     textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
                 },
-                className: "jsx-65b20f082eacd316" + " " + "absolute bottom-4 text-gray-400 text-sm opacity-70 z-20",
+                className: "jsx-8587291f1bf83338" + " " + "absolute bottom-4 text-gray-400 text-xs sm:text-sm opacity-70 z-20",
                 children: [
                     "version ",
                     changelog[0].version
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 236,
+                lineNumber: 229,
                 columnNumber: 7
             }, this),
             showChangelog && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 onClick: (e)=>e.target === e.currentTarget && setShowChangelog(false),
-                className: "jsx-65b20f082eacd316" + " " + "fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in",
+                className: "jsx-8587291f1bf83338" + " " + "fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                    className: "jsx-65b20f082eacd316" + " " + "bg-gray-900/95 border border-green-500/30 rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden backdrop-blur-md animate-slide-up",
+                    className: "jsx-8587291f1bf83338" + " " + "bg-gray-900/95 border border-green-500/30 rounded-xl shadow-2xl w-[95%] sm:w-full max-w-lg sm:max-w-2xl max-h-[80vh] overflow-hidden backdrop-blur-md animate-slide-up",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "jsx-65b20f082eacd316" + " " + "flex items-center justify-between p-6 border-b border-green-500/20",
+                            className: "jsx-8587291f1bf83338" + " " + "flex items-center justify-between p-4 sm:p-6 border-b border-green-500/20",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "jsx-65b20f082eacd316" + " " + "flex items-center gap-3",
+                                    className: "jsx-8587291f1bf83338" + " " + "flex items-center gap-2 sm:gap-3",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "jsx-65b20f082eacd316" + " " + "relative",
+                                            className: "jsx-8587291f1bf83338" + " " + "relative",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                    className: "jsx-65b20f082eacd316" + " " + "w-4 h-4 bg-green-400 rounded-full animate-pulse"
+                                                    className: "jsx-8587291f1bf83338" + " " + "w-3 sm:w-4 h-3 sm:h-4 bg-green-400 rounded-full animate-pulse"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.js",
-                                                    lineNumber: 251,
+                                                    lineNumber: 244,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                    className: "jsx-65b20f082eacd316" + " " + "absolute inset-0 w-4 h-4 bg-green-400 rounded-full animate-ping opacity-75"
+                                                    className: "jsx-8587291f1bf83338" + " " + "absolute inset-0 w-3 sm:w-4 h-3 sm:h-4 bg-green-400 rounded-full animate-ping opacity-75"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.js",
-                                                    lineNumber: 252,
+                                                    lineNumber: 245,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/page.js",
-                                            lineNumber: 250,
+                                            lineNumber: 243,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -434,224 +429,224 @@ function YearSelector() {
                                                 fontFamily: "'Courier New', monospace",
                                                 textShadow: '0 0 10px rgba(34, 197, 94, 0.5)'
                                             },
-                                            className: "jsx-65b20f082eacd316" + " " + "text-2xl font-bold text-green-400",
+                                            className: "jsx-8587291f1bf83338" + " " + "text-lg sm:text-2xl font-bold text-green-400",
                                             children: "CHANGELOG"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.js",
-                                            lineNumber: 254,
+                                            lineNumber: 247,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/page.js",
-                                    lineNumber: 249,
+                                    lineNumber: 242,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                     onClick: ()=>setShowChangelog(false),
                                     "aria-label": "Close changelog",
-                                    className: "jsx-65b20f082eacd316" + " " + "text-gray-400 hover:text-white transition-colors duration-200 p-2 hover:bg-gray-800 rounded-lg group",
+                                    className: "jsx-8587291f1bf83338" + " " + "text-gray-400 hover:text-white transition-colors duration-200 p-2 hover:bg-gray-800 rounded-lg group touch-target",
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
                                         fill: "none",
                                         stroke: "currentColor",
                                         viewBox: "0 0 24 24",
-                                        className: "jsx-65b20f082eacd316" + " " + "w-5 h-5 transform group-hover:rotate-90 transition-transform duration-200",
+                                        className: "jsx-8587291f1bf83338" + " " + "w-4 sm:w-5 h-4 sm:h-5 transform group-hover:rotate-90 transition-transform duration-200",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                                             strokeLinecap: "round",
                                             strokeLinejoin: "round",
                                             strokeWidth: 2,
                                             d: "M6 18L18 6M6 6l12 12",
-                                            className: "jsx-65b20f082eacd316"
+                                            className: "jsx-8587291f1bf83338"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.js",
-                                            lineNumber: 270,
+                                            lineNumber: 263,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.js",
-                                        lineNumber: 269,
+                                        lineNumber: 262,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/page.js",
-                                    lineNumber: 264,
+                                    lineNumber: 257,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/page.js",
-                            lineNumber: 248,
+                            lineNumber: 241,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "jsx-65b20f082eacd316" + " " + "p-6 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-green-600",
+                            className: "jsx-8587291f1bf83338" + " " + "p-4 sm:p-6 overflow-y-auto max-h-[50vh] sm:max-h-[60vh] scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-green-600",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "jsx-65b20f082eacd316" + " " + "space-y-6",
+                                className: "jsx-8587291f1bf83338" + " " + "space-y-4 sm:space-y-6",
                                 children: changelog.map((version, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         style: {
                                             animationDelay: "".concat(index * 100, "ms")
                                         },
-                                        className: "jsx-65b20f082eacd316" + " " + "border border-green-500/20 rounded-lg p-5 bg-gray-800/30 hover:bg-gray-800/50 transition-all duration-300 animate-fade-in-delayed",
+                                        className: "jsx-8587291f1bf83338" + " " + "border border-green-500/20 rounded-lg p-4 sm:p-5 bg-gray-800/30 hover:bg-gray-800/50 transition-all duration-300 animate-fade-in-delayed",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "jsx-65b20f082eacd316" + " " + "flex items-center justify-between mb-4",
+                                                className: "jsx-8587291f1bf83338" + " " + "flex items-center justify-between mb-3 sm:mb-4",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                        className: "jsx-65b20f082eacd316" + " " + "flex items-center gap-3",
+                                                        className: "jsx-8587291f1bf83338" + " " + "flex items-center gap-2 sm:gap-3",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                 style: {
                                                                     fontFamily: "'Courier New', monospace",
                                                                     textShadow: '0 0 5px rgba(34, 197, 94, 0.3)'
                                                                 },
-                                                                className: "jsx-65b20f082eacd316" + " " + "text-xl font-bold text-green-400",
+                                                                className: "jsx-8587291f1bf83338" + " " + "text-lg sm:text-xl font-bold text-green-400",
                                                                 children: [
                                                                     "v",
                                                                     version.version
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/page.js",
-                                                                lineNumber: 286,
+                                                                lineNumber: 279,
                                                                 columnNumber: 25
                                                             }, this),
                                                             index === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: "jsx-65b20f082eacd316" + " " + "px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full border border-green-500/30",
+                                                                className: "jsx-8587291f1bf83338" + " " + "px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full border border-green-500/30",
                                                                 children: "CURRENT"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/page.js",
-                                                                lineNumber: 296,
+                                                                lineNumber: 289,
                                                                 columnNumber: 27
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/page.js",
-                                                        lineNumber: 285,
+                                                        lineNumber: 278,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                        className: "jsx-65b20f082eacd316" + " " + "text-gray-400 text-sm font-mono",
+                                                        className: "jsx-8587291f1bf83338" + " " + "text-gray-400 text-xs sm:text-sm font-mono",
                                                         children: version.date
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/page.js",
-                                                        lineNumber: 301,
+                                                        lineNumber: 294,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/page.js",
-                                                lineNumber: 284,
+                                                lineNumber: 277,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
-                                                className: "jsx-65b20f082eacd316" + " " + "space-y-2",
+                                                className: "jsx-8587291f1bf83338" + " " + "space-y-2",
                                                 children: version.changes.map((change, changeIndex)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                                        className: "jsx-65b20f082eacd316" + " " + "flex items-start gap-3 text-gray-300 text-sm leading-relaxed",
+                                                        className: "jsx-8587291f1bf83338" + " " + "flex items-start gap-2 sm:gap-3 text-gray-300 text-xs sm:text-sm leading-relaxed",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                className: "jsx-65b20f082eacd316" + " " + "w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0"
+                                                                className: "jsx-8587291f1bf83338" + " " + "w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/page.js",
-                                                                lineNumber: 311,
+                                                                lineNumber: 304,
                                                                 columnNumber: 27
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: "jsx-65b20f082eacd316",
+                                                                className: "jsx-8587291f1bf83338",
                                                                 children: change
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/page.js",
-                                                                lineNumber: 312,
+                                                                lineNumber: 305,
                                                                 columnNumber: 27
                                                             }, this)
                                                         ]
                                                     }, changeIndex, true, {
                                                         fileName: "[project]/src/app/page.js",
-                                                        lineNumber: 307,
+                                                        lineNumber: 300,
                                                         columnNumber: 25
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.js",
-                                                lineNumber: 305,
+                                                lineNumber: 298,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, version.version, true, {
                                         fileName: "[project]/src/app/page.js",
-                                        lineNumber: 279,
+                                        lineNumber: 272,
                                         columnNumber: 19
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.js",
-                                lineNumber: 277,
+                                lineNumber: 270,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.js",
-                            lineNumber: 276,
+                            lineNumber: 269,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "jsx-65b20f082eacd316" + " " + "p-6 border-t border-green-500/20 bg-gray-900/50",
+                            className: "jsx-8587291f1bf83338" + " " + "p-4 sm:p-6 border-t border-green-500/20 bg-gray-900/50",
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "jsx-65b20f082eacd316" + " " + "flex items-center justify-between",
+                                className: "jsx-8587291f1bf83338" + " " + "flex items-center justify-between",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "jsx-65b20f082eacd316" + " " + "text-gray-400 text-xs font-mono",
+                                        className: "jsx-8587291f1bf83338" + " " + "text-gray-400 text-xs font-mono",
                                         children: [
                                             "Press ",
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("kbd", {
-                                                className: "jsx-65b20f082eacd316" + " " + "px-2 py-1 bg-gray-800 rounded text-green-400 border border-green-500/30",
+                                                className: "jsx-8587291f1bf83338" + " " + "px-2 py-1 bg-gray-800 rounded text-green-400 border border-green-500/30",
                                                 children: "ESC"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.js",
-                                                lineNumber: 325,
+                                                lineNumber: 318,
                                                 columnNumber: 25
                                             }, this),
                                             " to close"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.js",
-                                        lineNumber: 324,
+                                        lineNumber: 317,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                         onClick: ()=>setShowChangelog(false),
-                                        className: "jsx-65b20f082eacd316" + " " + "px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 rounded-lg transition-all duration-200 text-sm font-mono hover:scale-105",
+                                        className: "jsx-8587291f1bf83338" + " " + "px-3 sm:px-4 py-1.5 sm:py-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 rounded-lg transition-all duration-200 text-xs sm:text-sm font-mono hover:scale-105 touch-target",
                                         children: "CLOSE"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.js",
-                                        lineNumber: 327,
+                                        lineNumber: 320,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.js",
-                                lineNumber: 323,
+                                lineNumber: 316,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.js",
-                            lineNumber: 322,
+                            lineNumber: 315,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/page.js",
-                    lineNumber: 246,
+                    lineNumber: 239,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 242,
+                lineNumber: 235,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$styled$2d$jsx$2f$style$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                id: "65b20f082eacd316",
-                children: '@import "https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap";.scrollbar-none.jsx-65b20f082eacd316{scrollbar-width:none}.scrollbar-none.jsx-65b20f082eacd316::-webkit-scrollbar{display:none}.scrollbar-thin.jsx-65b20f082eacd316{scrollbar-width:thin;scrollbar-color:#059669 #1f2937}.scrollbar-thin.jsx-65b20f082eacd316::-webkit-scrollbar{width:8px}.scrollbar-thin.jsx-65b20f082eacd316::-webkit-scrollbar-track{background:#1f2937;border-radius:4px}.scrollbar-thin.jsx-65b20f082eacd316::-webkit-scrollbar-thumb{background:#059669;border-radius:4px}.scrollbar-thin.jsx-65b20f082eacd316.jsx-65b20f082eacd316::-webkit-scrollbar-thumb:hover{background:#10b981}@keyframes fade-in{0%{opacity:0}to{opacity:1}}@keyframes slide-up{0%{opacity:0;transform:translateY(20px)scale(.95)}to{opacity:1;transform:translateY(0)scale(1)}}@keyframes fade-in-delayed{0%{opacity:0;transform:translate(-20px)}to{opacity:1;transform:translate(0)}}.animate-fade-in.jsx-65b20f082eacd316{animation:.3s ease-out fade-in}.animate-slide-up.jsx-65b20f082eacd316{animation:.4s ease-out slide-up}.animate-fade-in-delayed.jsx-65b20f082eacd316{opacity:0;animation:.5s ease-out forwards fade-in-delayed}'
+                id: "8587291f1bf83338",
+                children: '@import "https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap";.scrollbar-none.jsx-8587291f1bf83338{scrollbar-width:none}.scrollbar-none.jsx-8587291f1bf83338::-webkit-scrollbar{display:none}.scrollbar-thin.jsx-8587291f1bf83338{scrollbar-width:thin;scrollbar-color:#059669 #1f2937}.scrollbar-thin.jsx-8587291f1bf83338::-webkit-scrollbar{width:6px}.scrollbar-thin.jsx-8587291f1bf83338::-webkit-scrollbar-track{background:#1f2937;border-radius:4px}.scrollbar-thin.jsx-8587291f1bf83338::-webkit-scrollbar-thumb{background:#059669;border-radius:4px}.scrollbar-thin.jsx-8587291f1bf83338.jsx-8587291f1bf83338::-webkit-scrollbar-thumb:hover{background:#10b981}@keyframes fade-in{0%{opacity:0}to{opacity:1}}@keyframes slide-up{0%{opacity:0;transform:translateY(20px)scale(.95)}to{opacity:1;transform:translateY(0)scale(1)}}@keyframes fade-in-delayed{0%{opacity:0;transform:translate(-20px)}to{opacity:1;transform:translate(0)}}.animate-fade-in.jsx-8587291f1bf83338{animation:.3s ease-out fade-in}.animate-slide-up.jsx-8587291f1bf83338{animation:.4s ease-out slide-up}.animate-fade-in-delayed.jsx-8587291f1bf83338{opacity:0;animation:.5s ease-out forwards fade-in-delayed}.touch-target.jsx-8587291f1bf83338{min-width:44px;min-height:44px;padding:8px}@media (max-width:640px){.text-4xl.jsx-8587291f1bf83338{font-size:2rem}.text-lg.jsx-8587291f1bf83338{font-size:1rem}.text-xs.jsx-8587291f1bf83338{font-size:.75rem}.max-w-2xl.jsx-8587291f1bf83338{max-width:100%}.p-4.jsx-8587291f1bf83338{padding:.5rem}.gap-2.jsx-8587291f1bf83338{gap:.25rem}.max-h-96.jsx-8587291f1bf83338{max-height:70vh}}'
             }, void 0, false, void 0, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/page.js",
-        lineNumber: 153,
+        lineNumber: 146,
         columnNumber: 5
     }, this);
 }

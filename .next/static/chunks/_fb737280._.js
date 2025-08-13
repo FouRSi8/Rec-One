@@ -18,33 +18,109 @@ var _s = __turbopack_context__.k.signature();
 ;
 function YearSelector() {
     _s();
-    const [selectedYear, setSelectedYear] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const canvasRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const currentYear = 2025;
+    const startYear = 1900;
+    const years = Array.from({
+        length: currentYear - startYear + 1
+    }, (_, i)=>currentYear - i);
+    const [selectedYears, setSelectedYears] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [firstClickedYear, setFirstClickedYear] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [showChangelog, setShowChangelog] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    // Sample changelog data - replace with your actual changelog
+    const changelog = [
+        {
+            version: "1.3",
+            date: "2025-08-10",
+            changes: [
+                "Introduced Other Language filter",
+                "Now you can get more movies of a different language with the same criteria",
+                "Other minor bug fixes"
+            ]
+        },
+        {
+            version: "1.2",
+            date: "2025-08-10",
+            changes: [
+                "Introduced Changelog",
+                "Improved Movie recommendation engine",
+                "Dominant Language based result system introduced",
+                "Version 2.0 will introduce a more responsive ui"
+            ]
+        },
+        {
+            version: "1.1",
+            date: "2025-08-09",
+            changes: [
+                "Introduced range selection functionality",
+                "Added visual feedback for selected years",
+                "Implemented better error handling",
+                "Enhanced accessibility features"
+            ]
+        },
+        {
+            version: "1.0",
+            date: "2025-08-09",
+            changes: [
+                "Initial release of Rec'One",
+                "Basic year selection functionality",
+                "Movie recommendation engine",
+                "Added Matrix-style background animation",
+                "Clean and intuitive interface"
+            ]
+        }
+    ];
     const handleYearClick = (year)=>{
-        setSelectedYear(year);
-    };
-    const handleNext = ()=>{
-        if (selectedYear) {
-            console.log("Selected base year:", selectedYear);
-        // Placeholder for navigation to next page
+        if (!firstClickedYear) {
+            // First click: select from clicked year to current year
+            const newSelectedYears = Array.from({
+                length: currentYear - year + 1
+            }, (_, i)=>year + i);
+            setSelectedYears(newSelectedYears);
+            setFirstClickedYear(year);
+        } else if (firstClickedYear === year) {
+            // Second click on same year: select only that year
+            setSelectedYears([
+                year
+            ]);
+            setFirstClickedYear(null);
+        } else {
+            // Second click on different year: select range between clicks
+            const start = Math.min(firstClickedYear, year);
+            const end = Math.max(firstClickedYear, year);
+            const newSelectedYears = Array.from({
+                length: end - start + 1
+            }, (_, i)=>start + i);
+            setSelectedYears(newSelectedYears);
+            setFirstClickedYear(null);
         }
     };
-    // Matrix falling code effect
+    const handleNext = ()=>{
+        if (selectedYears.length === 0) {
+            alert('Please select at least one year.');
+            return;
+        }
+        const yearRange = "".concat(Math.min(...selectedYears), "-").concat(Math.max(...selectedYears));
+        // router.push(`/language-mood?year=${yearRange}`);
+        console.log('Navigate to:', "/language-mood?year=".concat(yearRange));
+    };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "YearSelector.useEffect": ()=>{
             const canvas = canvasRef.current;
-            const ctx = canvas.getContext("2d");
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
             canvas.height = window.innerHeight;
             canvas.width = window.innerWidth;
-            const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             const fontSize = 14;
             const columns = canvas.width / fontSize;
             const drops = Array(Math.floor(columns)).fill(0);
             const draw = {
                 "YearSelector.useEffect.draw": ()=>{
-                    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.fillStyle = "#22C55E"; // Softer green for digital rain
+                    ctx.fillStyle = '#22C55E';
                     ctx.font = "".concat(fontSize, "px monospace");
                     for(let i = 0; i < drops.length; i++){
                         const text = chars.charAt(Math.floor(Math.random() * chars.length));
@@ -63,113 +139,517 @@ function YearSelector() {
                     canvas.width = window.innerWidth;
                 }
             }["YearSelector.useEffect.resizeCanvas"];
-            window.addEventListener("resize", resizeCanvas);
+            window.addEventListener('resize', resizeCanvas);
             return ({
                 "YearSelector.useEffect": ()=>{
                     clearInterval(interval);
-                    window.removeEventListener("resize", resizeCanvas);
+                    window.removeEventListener('resize', resizeCanvas);
                 }
             })["YearSelector.useEffect"];
         }
     }["YearSelector.useEffect"], []);
-    // Generate years from 1900 to current year (2025)
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({
-        length: currentYear - 1899
-    }, (_, i)=>currentYear - i);
+    // Close modal on escape key
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "YearSelector.useEffect": ()=>{
+            const handleEscape = {
+                "YearSelector.useEffect.handleEscape": (e)=>{
+                    if (e.key === 'Escape' && showChangelog) {
+                        setShowChangelog(false);
+                    }
+                }
+            }["YearSelector.useEffect.handleEscape"];
+            window.addEventListener('keydown', handleEscape);
+            return ({
+                "YearSelector.useEffect": ()=>window.removeEventListener('keydown', handleEscape)
+            })["YearSelector.useEffect"];
+        }
+    }["YearSelector.useEffect"], [
+        showChangelog
+    ]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "jsx-79c989753fc41b9e" + " " + "min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black to-gray-900 text-white font-sans relative",
+        style: {
+            fontFamily: "'Courier New', monospace"
+        },
+        className: "jsx-22731aa6a0d514a4" + " " + "min-h-screen flex flex-col items-center justify-center bg-black relative px-4 py-6",
         children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "jsx-22731aa6a0d514a4" + " " + "absolute inset-0 backdrop-blur-md bg-black/60 z-0"
+            }, void 0, false, {
+                fileName: "[project]/src/app/page.js",
+                lineNumber: 156,
+                columnNumber: 7
+            }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("canvas", {
                 ref: canvasRef,
-                className: "jsx-79c989753fc41b9e" + " " + "absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
+                className: "jsx-22731aa6a0d514a4" + " " + "absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none z-10"
             }, void 0, false, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 67,
+                lineNumber: 157,
                 columnNumber: 7
             }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                onClick: ()=>setShowChangelog(true),
                 style: {
-                    fontFamily: "'Cinzel', serif"
+                    fontFamily: "'Courier New', monospace",
+                    textShadow: '0 0 10px rgba(34, 197, 94, 0.5)'
                 },
-                className: "jsx-79c989753fc41b9e" + " " + "text-6xl font-extrabold mb-8 text-white tracking-wider drop-shadow-[0_0_10px_rgba(34,197,94,0.7)] animate-pulse z-10",
-                children: "Rec'One"
-            }, void 0, false, {
-                fileName: "[project]/src/app/page.js",
-                lineNumber: 68,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                className: "jsx-79c989753fc41b9e" + " " + "text-lg mb-6 text-gray-300 italic z-10",
-                children: "Discover your perfect movie, one recommendation at a time"
-            }, void 0, false, {
-                fileName: "[project]/src/app/page.js",
-                lineNumber: 71,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-79c989753fc41b9e" + " " + "text-center z-10",
+                "aria-label": "View changelog",
+                className: "jsx-22731aa6a0d514a4" + " " + "fixed top-4 right-4 sm:top-6 sm:right-6 group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-gray-800/80 hover:bg-green-500/20 border border-green-500/30 hover:border-green-400 text-green-400 hover:text-green-300 rounded-lg transition-all duration-300 backdrop-blur-sm z-30 transform hover:scale-105 touch-manipulation",
                 children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                        className: "jsx-79c989753fc41b9e" + " " + "text-xl font-semibold text-gray-200 mb-4",
-                        children: "Choose Base Year (all movies from this year onward)"
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "jsx-22731aa6a0d514a4" + " " + "relative",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "jsx-22731aa6a0d514a4" + " " + "w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-pulse"
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/page.js",
+                                lineNumber: 170,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "jsx-22731aa6a0d514a4" + " " + "absolute inset-0 w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-ping opacity-75"
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/page.js",
+                                lineNumber: 171,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/app/page.js",
+                        lineNumber: 169,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                        className: "jsx-22731aa6a0d514a4" + " " + "text-xs sm:text-sm font-mono",
+                        children: "LOG"
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 73,
+                        lineNumber: 173,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "jsx-79c989753fc41b9e" + " " + "grid grid-cols-5 gap-2 max-w-2xl mx-auto p-4 max-h-96 overflow-y-auto scrollbar-none",
-                        children: years.map((year)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                onClick: ()=>handleYearClick(year),
-                                className: "jsx-79c989753fc41b9e" + " " + "p-2 rounded-lg transition duration-200 ".concat(selectedYear === year ? "bg-green-500 text-black" : "bg-gray-800 text-gray-200 hover:bg-green-500 hover:text-black"),
-                                children: year
-                            }, year, false, {
-                                fileName: "[project]/src/app/page.js",
-                                lineNumber: 76,
-                                columnNumber: 13
-                            }, this))
-                    }, void 0, false, {
+                        className: "jsx-22731aa6a0d514a4" + " " + "text-xs opacity-60 group-hover:opacity-100 transition-opacity duration-300 hidden xs:block",
+                        children: [
+                            "v",
+                            changelog[0].version
+                        ]
+                    }, void 0, true, {
                         fileName: "[project]/src/app/page.js",
-                        lineNumber: 74,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                        onClick: handleNext,
-                        disabled: !selectedYear,
-                        className: "jsx-79c989753fc41b9e" + " " + "mt-6 px-6 py-2 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-600 transition duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed",
-                        children: "Next"
-                    }, void 0, false, {
-                        fileName: "[project]/src/app/page.js",
-                        lineNumber: 89,
+                        lineNumber: 176,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 72,
+                lineNumber: 160,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                style: {
+                    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)'
+                },
+                className: "jsx-22731aa6a0d514a4" + " " + "text-3xl sm:text-4xl md:text-6xl font-extrabold mb-6 sm:mb-8 text-white tracking-wider animate-pulse z-20 text-center",
+                children: "Rec'One"
+            }, void 0, false, {
+                fileName: "[project]/src/app/page.js",
+                lineNumber: 182,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-79c989753fc41b9e" + " " + "absolute bottom-4 text-gray-400 text-sm opacity-70 z-10",
-                children: "Powered by subreddit sentiment analysis"
-            }, void 0, false, {
+                className: "jsx-22731aa6a0d514a4" + " " + "text-center z-20 w-full max-w-4xl",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                        style: {
+                            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
+                        },
+                        className: "jsx-22731aa6a0d514a4" + " " + "text-lg sm:text-xl font-semibold text-gray-200 mb-4 px-4",
+                        children: [
+                            "Choose Movie Release Years ",
+                            selectedYears.length > 0 ? "(".concat(Math.min(...selectedYears), "-").concat(Math.max(...selectedYears), ")") : ''
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/app/page.js",
+                        lineNumber: 187,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "jsx-22731aa6a0d514a4" + " " + "mb-6 px-4 space-y-1 sm:space-y-0",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                style: {
+                                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
+                                },
+                                className: "jsx-22731aa6a0d514a4" + " " + "text-xs sm:text-sm text-gray-300 italic z-20",
+                                children: "Tap once to select all years ahead"
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/page.js",
+                                lineNumber: 193,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                style: {
+                                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
+                                },
+                                className: "jsx-22731aa6a0d514a4" + " " + "text-xs sm:text-sm text-gray-300 italic z-20",
+                                children: "Tap twice to select a specific year"
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/page.js",
+                                lineNumber: 196,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                style: {
+                                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
+                                },
+                                className: "jsx-22731aa6a0d514a4" + " " + "text-xs sm:text-sm text-gray-300 italic z-20",
+                                children: "Tap two years to select the interval (inclusive)"
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/page.js",
+                                lineNumber: 199,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/app/page.js",
+                        lineNumber: 192,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        role: "grid",
+                        "aria-label": "Year selection grid",
+                        className: "jsx-22731aa6a0d514a4" + " " + "grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2 sm:gap-3 mx-auto p-2 sm:p-4 max-h-60 sm:max-h-80 md:max-h-96 overflow-y-auto scrollbar-none",
+                        children: years.map((year)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                onClick: ()=>handleYearClick(year),
+                                style: {
+                                    fontFamily: "'Courier New', monospace",
+                                    textShadow: selectedYears.includes(year) ? 'none' : '1px 1px 2px rgba(0, 0, 0, 0.3)',
+                                    minHeight: '44px' // Minimum touch target size
+                                },
+                                "aria-label": "Select year ".concat(year),
+                                className: "jsx-22731aa6a0d514a4" + " " + "p-2 sm:p-3 rounded-lg transition duration-200 touch-manipulation text-xs sm:text-sm font-medium active:scale-95 ".concat(selectedYears.includes(year) ? 'bg-green-500 text-black shadow-lg shadow-green-500/25' : 'bg-gray-800 text-gray-200 hover:bg-green-500 hover:text-black active:bg-green-400'),
+                                children: year
+                            }, year, false, {
+                                fileName: "[project]/src/app/page.js",
+                                lineNumber: 207,
+                                columnNumber: 13
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "[project]/src/app/page.js",
+                        lineNumber: 205,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "jsx-22731aa6a0d514a4" + " " + "flex justify-center mt-6 sm:mt-8 px-4",
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                            onClick: handleNext,
+                            disabled: selectedYears.length === 0,
+                            style: {
+                                fontFamily: "'Courier New', monospace",
+                                textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
+                                minHeight: '48px' // Minimum touch target size
+                            },
+                            "aria-label": "Proceed to next step",
+                            className: "jsx-22731aa6a0d514a4" + " " + "px-8 sm:px-12 py-3 sm:py-4 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-600 active:bg-green-400 transition duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base touch-manipulation shadow-lg shadow-green-500/25",
+                            children: "Next"
+                        }, void 0, false, {
+                            fileName: "[project]/src/app/page.js",
+                            lineNumber: 229,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/src/app/page.js",
+                        lineNumber: 228,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
                 fileName: "[project]/src/app/page.js",
-                lineNumber: 97,
+                lineNumber: 186,
                 columnNumber: 7
             }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                style: {
+                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
+                },
+                className: "jsx-22731aa6a0d514a4" + " " + "absolute bottom-4 text-gray-400 text-xs sm:text-sm opacity-70 z-20",
+                children: [
+                    "version ",
+                    changelog[0].version
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/app/page.js",
+                lineNumber: 246,
+                columnNumber: 7
+            }, this),
+            showChangelog && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                onClick: (e)=>e.target === e.currentTarget && setShowChangelog(false),
+                className: "jsx-22731aa6a0d514a4" + " " + "fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4",
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "jsx-22731aa6a0d514a4" + " " + "bg-gray-900/95 border border-green-500/30 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-hidden backdrop-blur-md animate-slide-up",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "jsx-22731aa6a0d514a4" + " " + "flex items-center justify-between p-4 sm:p-6 border-b border-green-500/20",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "jsx-22731aa6a0d514a4" + " " + "flex items-center gap-2 sm:gap-3",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "jsx-22731aa6a0d514a4" + " " + "relative",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "jsx-22731aa6a0d514a4" + " " + "w-3 h-3 sm:w-4 sm:h-4 bg-green-400 rounded-full animate-pulse"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/app/page.js",
+                                                    lineNumber: 261,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "jsx-22731aa6a0d514a4" + " " + "absolute inset-0 w-3 h-3 sm:w-4 sm:h-4 bg-green-400 rounded-full animate-ping opacity-75"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/app/page.js",
+                                                    lineNumber: 262,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/app/page.js",
+                                            lineNumber: 260,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                                            style: {
+                                                fontFamily: "'Courier New', monospace",
+                                                textShadow: '0 0 10px rgba(34, 197, 94, 0.5)'
+                                            },
+                                            className: "jsx-22731aa6a0d514a4" + " " + "text-lg sm:text-2xl font-bold text-green-400",
+                                            children: "CHANGELOG"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/app/page.js",
+                                            lineNumber: 264,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/app/page.js",
+                                    lineNumber: 259,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                    onClick: ()=>setShowChangelog(false),
+                                    style: {
+                                        minHeight: '44px',
+                                        minWidth: '44px'
+                                    },
+                                    "aria-label": "Close changelog",
+                                    className: "jsx-22731aa6a0d514a4" + " " + "text-gray-400 hover:text-white transition-colors duration-200 p-2 hover:bg-gray-800 rounded-lg group touch-manipulation",
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                        fill: "none",
+                                        stroke: "currentColor",
+                                        viewBox: "0 0 24 24",
+                                        className: "jsx-22731aa6a0d514a4" + " " + "w-5 h-5 transform group-hover:rotate-90 transition-transform duration-200",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                            strokeLinecap: "round",
+                                            strokeLinejoin: "round",
+                                            strokeWidth: 2,
+                                            d: "M6 18L18 6M6 6l12 12",
+                                            className: "jsx-22731aa6a0d514a4"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/app/page.js",
+                                            lineNumber: 281,
+                                            columnNumber: 19
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/page.js",
+                                        lineNumber: 280,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "[project]/src/app/page.js",
+                                    lineNumber: 274,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/app/page.js",
+                            lineNumber: 258,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "jsx-22731aa6a0d514a4" + " " + "p-4 sm:p-6 overflow-y-auto max-h-[60vh] sm:max-h-[60vh] scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-green-600",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "jsx-22731aa6a0d514a4" + " " + "space-y-4 sm:space-y-6",
+                                children: changelog.map((version, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        style: {
+                                            animationDelay: "".concat(index * 100, "ms")
+                                        },
+                                        className: "jsx-22731aa6a0d514a4" + " " + "border border-green-500/20 rounded-lg p-4 sm:p-5 bg-gray-800/30 hover:bg-gray-800/50 transition-all duration-300 animate-fade-in-delayed",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "jsx-22731aa6a0d514a4" + " " + "flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 gap-2",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "jsx-22731aa6a0d514a4" + " " + "flex items-center gap-2 sm:gap-3",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                style: {
+                                                                    fontFamily: "'Courier New', monospace",
+                                                                    textShadow: '0 0 5px rgba(34, 197, 94, 0.3)'
+                                                                },
+                                                                className: "jsx-22731aa6a0d514a4" + " " + "text-lg sm:text-xl font-bold text-green-400",
+                                                                children: [
+                                                                    "v",
+                                                                    version.version
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/src/app/page.js",
+                                                                lineNumber: 297,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            index === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                className: "jsx-22731aa6a0d514a4" + " " + "px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full border border-green-500/30",
+                                                                children: "CURRENT"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/page.js",
+                                                                lineNumber: 307,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/app/page.js",
+                                                        lineNumber: 296,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "jsx-22731aa6a0d514a4" + " " + "text-gray-400 text-sm font-mono",
+                                                        children: version.date
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/app/page.js",
+                                                        lineNumber: 312,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/src/app/page.js",
+                                                lineNumber: 295,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
+                                                className: "jsx-22731aa6a0d514a4" + " " + "space-y-2",
+                                                children: version.changes.map((change, changeIndex)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                                        className: "jsx-22731aa6a0d514a4" + " " + "flex items-start gap-3 text-gray-300 text-sm leading-relaxed",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "jsx-22731aa6a0d514a4" + " " + "w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/page.js",
+                                                                lineNumber: 322,
+                                                                columnNumber: 27
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                className: "jsx-22731aa6a0d514a4",
+                                                                children: change
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/page.js",
+                                                                lineNumber: 323,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        ]
+                                                    }, changeIndex, true, {
+                                                        fileName: "[project]/src/app/page.js",
+                                                        lineNumber: 318,
+                                                        columnNumber: 25
+                                                    }, this))
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/app/page.js",
+                                                lineNumber: 316,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, version.version, true, {
+                                        fileName: "[project]/src/app/page.js",
+                                        lineNumber: 290,
+                                        columnNumber: 19
+                                    }, this))
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/page.js",
+                                lineNumber: 288,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/src/app/page.js",
+                            lineNumber: 287,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "jsx-22731aa6a0d514a4" + " " + "p-4 sm:p-6 border-t border-green-500/20 bg-gray-900/50",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "jsx-22731aa6a0d514a4" + " " + "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "jsx-22731aa6a0d514a4" + " " + "text-gray-400 text-xs font-mono text-center sm:text-left",
+                                        children: [
+                                            "Press ",
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("kbd", {
+                                                className: "jsx-22731aa6a0d514a4" + " " + "px-2 py-1 bg-gray-800 rounded text-green-400 border border-green-500/30",
+                                                children: "ESC"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/app/page.js",
+                                                lineNumber: 336,
+                                                columnNumber: 25
+                                            }, this),
+                                            " to close"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/app/page.js",
+                                        lineNumber: 335,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: ()=>setShowChangelog(false),
+                                        style: {
+                                            minHeight: '44px'
+                                        },
+                                        className: "jsx-22731aa6a0d514a4" + " " + "px-4 py-2 bg-green-500/20 hover:bg-green-500/30 active:bg-green-500/40 text-green-300 border border-green-500/30 rounded-lg transition-all duration-200 text-sm font-mono hover:scale-105 active:scale-95 touch-manipulation",
+                                        children: "CLOSE"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/page.js",
+                                        lineNumber: 338,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/app/page.js",
+                                lineNumber: 334,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/src/app/page.js",
+                            lineNumber: 333,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/app/page.js",
+                    lineNumber: 256,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/src/app/page.js",
+                lineNumber: 252,
+                columnNumber: 9
+            }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$styled$2d$jsx$2f$style$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                id: "79c989753fc41b9e",
-                children: '@import "https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap";.scrollbar-none.jsx-79c989753fc41b9e{scrollbar-width:none}.scrollbar-none.jsx-79c989753fc41b9e::-webkit-scrollbar{display:none}'
+                id: "22731aa6a0d514a4",
+                children: ".scrollbar-none.jsx-22731aa6a0d514a4{scrollbar-width:none}.scrollbar-none.jsx-22731aa6a0d514a4::-webkit-scrollbar{display:none}.scrollbar-thin.jsx-22731aa6a0d514a4{scrollbar-width:thin;scrollbar-color:#059669 #1f2937}.scrollbar-thin.jsx-22731aa6a0d514a4::-webkit-scrollbar{width:8px}.scrollbar-thin.jsx-22731aa6a0d514a4::-webkit-scrollbar-track{background:#1f2937;border-radius:4px}.scrollbar-thin.jsx-22731aa6a0d514a4::-webkit-scrollbar-thumb{background:#059669;border-radius:4px}.scrollbar-thin.jsx-22731aa6a0d514a4.jsx-22731aa6a0d514a4::-webkit-scrollbar-thumb:hover{background:#10b981}@keyframes fade-in{0%{opacity:0}to{opacity:1}}@keyframes slide-up{0%{opacity:0;transform:translateY(20px)scale(.95)}to{opacity:1;transform:translateY(0)scale(1)}}@keyframes fade-in-delayed{0%{opacity:0;transform:translate(-20px)}to{opacity:1;transform:translate(0)}}.animate-fade-in.jsx-22731aa6a0d514a4{animation:.3s ease-out fade-in}.animate-slide-up.jsx-22731aa6a0d514a4{animation:.4s ease-out slide-up}.animate-fade-in-delayed.jsx-22731aa6a0d514a4{opacity:0;animation:.5s ease-out forwards fade-in-delayed}.touch-manipulation.jsx-22731aa6a0d514a4{touch-action:manipulation}@media (max-width:640px){.scrollbar-thin.jsx-22731aa6a0d514a4::-webkit-scrollbar{width:6px}}"
             }, void 0, false, void 0, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/page.js",
-        lineNumber: 66,
+        lineNumber: 150,
         columnNumber: 5
     }, this);
 }
-_s(YearSelector, "IAcwvhvdyOjGKNvXwAP7Teu6aEQ=");
+_s(YearSelector, "wBm9XLqhYswWql3JWn6BUhCUn/k=");
 _c = YearSelector;
 var _c;
 __turbopack_context__.k.register(_c, "YearSelector");

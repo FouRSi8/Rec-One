@@ -99,7 +99,7 @@ function MovieRecommendationContent() {
           .map(rec => ({
             ...rec,
             genres: rec.genres || [],
-            credits: rec.credits || { crew: [] },
+            credits: rec.credits || { crew: [], cast: [] },
             overview: rec.overview || "No summary available",
             poster_path: rec.poster_path || "/default-poster.jpg",
           }));
@@ -211,7 +211,7 @@ function MovieRecommendationContent() {
       <p className="text-lg mb-6 text-gray-300 italic z-20" style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)" }}>
         Discover your perfect movie match
       </p>
-      <div className="w-full max-w-6xl flex items-center justify-between px-6 py-8 z-20">
+      <div className="w-full max-w-6xl flex items-start justify-between px-6 py-8 z-20">
         <div className="w-1/3 flex items-center justify-center">
           {loading && <div className="text-xl animate-pulse text-white">Scanning Matrix...</div>}
           {error && <div className="text-red-500 text-xl">{error}</div>}
@@ -257,6 +257,36 @@ function MovieRecommendationContent() {
                 <p className="text-lg"><strong>Original Language:</strong> {currentRecommendation.original_language?.toUpperCase() || "N/A"}</p>
               </div>
               <p className="text-lg"><strong>Summary:</strong> {currentRecommendation.overview?.substring(0, 200) || "No summary available."}{currentRecommendation.overview?.length > 200 ? "..." : ""}</p>
+              {currentRecommendation.credits?.cast?.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-xl font-semibold text-white mb-2" style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)" }}>
+                    Top Cast
+                  </h4>
+                  <div className="flex flex-wrap gap-4">
+                    {currentRecommendation.credits.cast.map((actor, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        {actor.profile_path ? (
+                          <Image
+                            src={`https://image.tmdb.org/t/p/w92${actor.profile_path}`}
+                            alt={actor.name || "Cast Member"}
+                            width={50}
+                            height={50}
+                            className="w-12 h-12 object-cover rounded-full border-2 border-white shadow-md"
+                            onError={(e) => { e.target.src = "/default-profile.jpg"; e.target.alt = "Default Profile"; }}
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center text-white text-sm border-2 border-white shadow-md">
+                            N/A
+                          </div>
+                        )}
+                        <span className="text-lg text-white" style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.3)" }}>
+                          {actor.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               {currentRecommendation.totalScore && currentRecommendation.totalScore > 0 && (
                 <div className="mt-2">
                   {currentRecommendation.strategyUsed && (

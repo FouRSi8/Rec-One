@@ -247,7 +247,13 @@ async function GET(request) {
                 ]);
                 return {
                     ...movieDetails.data,
-                    credits: credits.data,
+                    credits: {
+                        ...credits.data,
+                        cast: credits.data.cast.slice(0, 5).map((actor)=>({
+                                name: actor.name,
+                                profile_path: actor.profile_path || null
+                            }))
+                    },
                     keywords: keywords.data.keywords || [],
                     belongs_to_collection: movieDetails.data.belongs_to_collection || null
                 };
@@ -264,7 +270,6 @@ async function GET(request) {
             })));
         const movieAnalysis = await analyzeInputMoviesEnhanced(inputMovies);
         console.log("Movie analysis:", movieAnalysis);
-        // NEW: Compute allowedLanguages based on input movies' languages
         const inputLanguages = new Set(inputMovies.map((m)=>m.original_language));
         let allowedLanguages;
         if (inputLanguages.size === 3) {
@@ -278,7 +283,7 @@ async function GET(request) {
             const commonLang = Object.entries(langCounts).find(([lang, count])=>count >= 2)?.[0];
             allowedLanguages = commonLang ? [
                 commonLang
-            ] : []; // Fallback to empty if no common (edge case)
+            ] : [];
         }
         console.log("Allowed languages for recommendations:", allowedLanguages);
         let redditRecommendations = [];
@@ -369,7 +374,6 @@ async function GET(request) {
                 });
             }
         }
-        // NEW: Apply language filter to the full initial pool (after fallback if needed)
         allRecommendations = allRecommendations.filter((candidate)=>{
             if (otherLanguages) {
                 return candidate.original_language && !allowedLanguages.includes(candidate.original_language);
@@ -403,6 +407,13 @@ async function GET(request) {
                 const detailedMovie = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].get(`https://api.themoviedb.org/3/movie/${rec.id}?api_key=${TMDB_API_KEY1}&append_to_response=credits`, axiosConfig1);
                 return {
                     ...detailedMovie.data,
+                    credits: {
+                        ...detailedMovie.data.credits,
+                        cast: detailedMovie.data.credits.cast.slice(0, 5).map((actor)=>({
+                                name: actor.name,
+                                profile_path: actor.profile_path || null
+                            }))
+                    },
                     totalScore: rec.totalScore,
                     strategyUsed: rec.strategyName,
                     strategyPriority: rec.strategyPriority,
@@ -437,7 +448,7 @@ async function GET(request) {
         });
     }
 }
-function analyzeInputMoviesEnhanced(inputMovies) {
+async function analyzeInputMoviesEnhanced(inputMovies) {
     const analysis = {
         isAnimated: false,
         isAnime: false,
@@ -534,7 +545,6 @@ function analyzeInputMoviesEnhanced(inputMovies) {
         analysis.isAnime = true;
         analysis.isAnimated = true;
     }
-    // Improved franchise detection
     const stopwords = [
         'the',
         'of',
@@ -567,7 +577,6 @@ function analyzeInputMoviesEnhanced(inputMovies) {
                 franchiseKeywords: collection.name.split(/\s+/).filter((w)=>!stopwords.includes(w.toLowerCase()) && w.length > 2)
             };
         }
-        // Fallback: Check title words against TMDB collections
         const allWords = inputMovies.flatMap((m)=>m.title.toLowerCase().split(/\s+|[^\w\s]/).filter((word)=>word.length > 3 && !stopwords.includes(word)));
         const wordCounts = {};
         allWords.forEach((word)=>{
@@ -1623,8 +1632,15 @@ async function enhanceRedditRecommendationsWithTMDB(redditRecs, apiKey, axiosCon
                 const isFranchiseMatch = movieAnalysis.franchisePattern && titleLower.includes(movieAnalysis.franchisePattern.toLowerCase());
                 const isGenreMatch = movieAnalysis.genreAnalysis.primaryGenre && bestMatch.genre_ids?.includes(movieAnalysis.genreAnalysis.primaryGenre.id);
                 if (movieAnalysis.isAnime && (bestMatch.original_language === 'ja' || bestMatch.genre_ids?.includes(16)) && calculateTitleSimilarity(rec.title, bestMatch.title) > 0.3) {
+                    const creditsResponse = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].get(`https://api.themoviedb.org/3/movie/${bestMatch.id}/credits?api_key=${apiKey}`, axiosConfig1);
                     return {
                         ...bestMatch,
+                        credits: {
+                            cast: creditsResponse.data.cast.slice(0, 5).map((actor)=>({
+                                    name: actor.name,
+                                    profile_path: actor.profile_path || null
+                                }))
+                        },
                         redditData: {
                             originalTitle: rec.title,
                             redditScore: rec.redditScore,
@@ -1636,8 +1652,15 @@ async function enhanceRedditRecommendationsWithTMDB(redditRecs, apiKey, axiosCon
                         }
                     };
                 } else if (!movieAnalysis.isAnimated && !bestMatch.genre_ids?.includes(16) && bestMatch.vote_average >= (movieAnalysis.qualityIndicators.qualityTier === 'premium' ? 7.0 : 6.0) && (isFranchiseMatch || isGenreMatch) && calculateTitleSimilarity(rec.title, bestMatch.title) > 0.3) {
+                    const creditsResponse = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].get(`https://api.themoviedb.org/3/movie/${bestMatch.id}/credits?api_key=${apiKey}`, axiosConfig1);
                     return {
                         ...bestMatch,
+                        credits: {
+                            cast: creditsResponse.data.cast.slice(0, 5).map((actor)=>({
+                                    name: actor.name,
+                                    profile_path: actor.profile_path || null
+                                }))
+                        },
                         redditData: {
                             originalTitle: rec.title,
                             redditScore: rec.redditScore,
